@@ -2,7 +2,7 @@
 
 The works are in the following directories structure and files:
 
-| Path <img width=282/> | Description <img width=500/> |
+| Path <img width=282/> | Description <img width=600/> |
 | ------ | ------ |
-| Jay/communicate-android | example android application for test communicating between Wear OS and Android OS |
-| Jay/communicate-watch|  example watch application for test communicating between Wear OS and Android OS |
+| Jay/communicate-android | example android application to test communication |
+| Jay/communicate-watch | example watch application to test communication |

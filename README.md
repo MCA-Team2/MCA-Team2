@@ -14,7 +14,8 @@
 | ------ | ------ |
 | android/* | Smart phone application project directory |
 | wear/* | Smart watch application project directory |
-| course/* | Documents for class (*.ppts, *.pdf, ...) |
+| course/* | Documents for class |
+| work_station/* | Experimental works |
 
 
 # Branch Naming
