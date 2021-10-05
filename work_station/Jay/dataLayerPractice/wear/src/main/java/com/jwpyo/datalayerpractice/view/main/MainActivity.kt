@@ -46,12 +46,13 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
     override fun onDataChanged(dataEvents: DataEventBuffer) {
         /**
          * @author Jay
-         * when count data from mobile is received,
-         * below lines are executed
+         * when count data from mobile/wear is received,
+         * update count data in view model
          *
          * exactly same with mobile/MainActivity
          */
-        Log.d("JAEWOO", "$dataEvents")
+        Log.d("MainActivity::onDataChanged", "$dataEvents")
+
         dataEvents.forEach { dataEvent ->
             when (dataEvent.type) {
                 TYPE_CHANGED -> {
@@ -78,8 +79,8 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
     }
 
     private fun setEventListeners() {
-        binding.resetButton.setOnClickListener {
-//            mainViewModel.resetCount()
+        binding.decreaseButton.setOnClickListener {
+            mainViewModel.minusCount()
         }
     }
 }

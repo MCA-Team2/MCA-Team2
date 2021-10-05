@@ -11,13 +11,12 @@ import com.jwpyo.datalayerpractice.utils.Constant
 class MainViewModel(
     private val dataClient: DataClient
 ) : ViewModel() {
-    val count = MutableLiveData(0)
+    val count = MutableLiveData<Int>()
 
-    fun increaseCount(): Task<DataItem> {
-        count.value = count.value?.plus(1)
-
+    fun plusCount(): Task<DataItem> {
         val putDataMapRequest = PutDataMapRequest.create(Constant.COUNT_PATH).apply {
-            dataMap.putInt(Constant.COUNT_KEY, count.value!!)
+            val newCount = count.value?.plus(1) ?: 0
+            dataMap.putInt(Constant.COUNT_KEY, newCount)
         }
 
         val request = putDataMapRequest.asPutDataRequest().apply {

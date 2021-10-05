@@ -38,12 +38,12 @@
                 tools:text="count = 10" />
 
             <Button
-                android:id="@+id/reset_button"
+                android:id="@+id/decrease_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|center_horizontal"
                 android:gravity="center"
-                android:text="@string/reset_button_text"
+                android:text="@string/decrease_button_text"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 

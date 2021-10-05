@@ -1,12 +1,16 @@
 package com.jwpyo.datalayerpractice.view.main
 
 import android.os.Bundle
+import android.util.Log
 import com.google.android.gms.wearable.DataClient.OnDataChangedListener
+import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
+import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
 import com.jwpyo.datalayerpractice.R
 import com.jwpyo.datalayerpractice.base.BaseActivity
 import com.jwpyo.datalayerpractice.databinding.ActivityMainBinding
+import com.jwpyo.datalayerpractice.utils.Constant
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : BaseActivity(), OnDataChangedListener {
@@ -35,22 +39,44 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
         Wearable.getDataClient(this).removeListener(this)
     }
 
-    override fun onDataChanged(dataEvent: DataEventBuffer) {
+    override fun onDataChanged(dataEvents: DataEventBuffer) {
         /**
          * @author Jay
-         * mobile 에서 data layer 에 보낸 putInt 요청으로,
-         * data layer 에 수정이 일어나면,
-         * wear 도 당연히 이벤트[dataEvent]를 수신하지만,
-         * mobile 또한 그 이벤트[dataEvent]를 수신합니다.
+         * when count data from mobile/wear is received,
+         * update count data in view model
          *
-         * wear 에서 녹음 파일을 송신할 것이고,
-         * mobile 에서 수신하는 부분은 여기에!
+         * exactly same with mobile/MainActivity
          */
+        Log.d("MainActivity::onDataChanged", "$dataEvents")
+
+        dataEvents.forEach { dataEvent ->
+            when (dataEvent.type) {
+                DataEvent.TYPE_CHANGED -> {
+                    when (dataEvent.dataItem.uri.path) {
+                        Constant.COUNT_PATH -> {
+                            val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
+                            val count = dataMapItem.dataMap.getInt(Constant.COUNT_KEY)
+
+                            mainViewModel.count.postValue(count)
+                        }
+                        else -> {
+                            TODO()
+                        }
+                    }
+                }
+                DataEvent.TYPE_DELETED -> {
+                    TODO()
+                }
+                else -> {
+                    TODO()
+                }
+            }
+        }
     }
 
     private fun setEventListeners() {
         binding.increaseButton.setOnClickListener {
-            mainViewModel.increaseCount()
+            mainViewModel.plusCount()
         }
     }
 }
