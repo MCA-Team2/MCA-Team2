@@ -1,7 +1,6 @@
 package com.jwpyo.datalayerpractice.view.main
 
 import android.os.Bundle
-import android.util.Log
 import com.google.android.gms.wearable.DataClient.OnDataChangedListener
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.Wearable
@@ -50,13 +49,9 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
     }
 
     private fun setEventListeners() {
-        binding.sendButton.setOnClickListener {
-            Log.d(TAG, "count=${mainViewModel.count}")
+        binding.increaseButton.setOnClickListener {
+            mainViewModel.increaseCount()
             mainViewModel.sendCount()
         }
-    }
-
-    companion object {
-        const val TAG = "MainActivity::Logging"
     }
 }

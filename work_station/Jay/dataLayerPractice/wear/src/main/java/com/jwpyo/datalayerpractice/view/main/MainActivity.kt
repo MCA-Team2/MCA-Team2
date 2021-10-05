@@ -1,7 +1,6 @@
 package com.jwpyo.datalayerpractice.view.main
 
 import android.os.Bundle
-import android.util.Log
 import androidx.wear.ambient.AmbientModeSupport
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.DataEvent.TYPE_CHANGED
@@ -54,7 +53,7 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
                         Constant.COUNT_PATH -> {
                             val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
                             val count = dataMapItem.dataMap.getInt(Constant.COUNT_KEY)
-                            Log.d(TAG, "hello count=$count")
+
                             mainViewModel.count.postValue(count)
                         }
                         else -> {
@@ -70,9 +69,5 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
                 }
             }
         }
-    }
-
-    companion object {
-        const val TAG = "MainActivity::Logging"
     }
 }
