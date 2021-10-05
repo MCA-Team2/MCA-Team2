@@ -1,6 +1,7 @@
 package com.jwpyo.datalayerpractice.view.main
 
 import android.os.Bundle
+import android.util.Log
 import androidx.wear.ambient.AmbientModeSupport
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.DataEvent.TYPE_CHANGED
@@ -28,6 +29,8 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
         }
 
         AmbientModeSupport.attach(this)
+
+        setEventListeners()
     }
 
     override fun onResume() {
@@ -45,7 +48,10 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
          * @author Jay
          * when count data from mobile is received,
          * below lines are executed
+         *
+         * exactly same with mobile/MainActivity
          */
+        Log.d("JAEWOO", "$dataEvents")
         dataEvents.forEach { dataEvent ->
             when (dataEvent.type) {
                 TYPE_CHANGED -> {
@@ -68,6 +74,12 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
                     TODO()
                 }
             }
+        }
+    }
+
+    private fun setEventListeners() {
+        binding.resetButton.setOnClickListener {
+//            mainViewModel.resetCount()
         }
     }
 }

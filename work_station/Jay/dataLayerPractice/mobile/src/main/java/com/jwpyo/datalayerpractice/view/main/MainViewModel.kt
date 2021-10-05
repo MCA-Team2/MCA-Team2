@@ -13,11 +13,9 @@ class MainViewModel(
 ) : ViewModel() {
     val count = MutableLiveData(0)
 
-    fun increaseCount() {
+    fun increaseCount(): Task<DataItem> {
         count.value = count.value?.plus(1)
-    }
 
-    fun sendCount(): Task<DataItem> {
         val putDataMapRequest = PutDataMapRequest.create(Constant.COUNT_PATH).apply {
             dataMap.putInt(Constant.COUNT_KEY, count.value!!)
         }

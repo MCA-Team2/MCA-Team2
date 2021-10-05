@@ -36,6 +36,7 @@
             android:layout_height="0dp"
             android:gravity="center"
             android:text="@string/increase_button_text"
+            android:textColor="@color/font"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"

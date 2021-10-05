@@ -51,7 +51,6 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
     private fun setEventListeners() {
         binding.increaseButton.setOnClickListener {
             mainViewModel.increaseCount()
-            mainViewModel.sendCount()
         }
     }
 }
