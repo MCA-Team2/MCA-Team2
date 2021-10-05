@@ -48,7 +48,7 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
     }
 
     private fun setEventListeners() {
-        binding.textView.setOnClickListener {
+        binding.sendButton.setOnClickListener {
             Log.d(TAG, "count=${mainViewModel.count}")
             mainViewModel.sendCount()
         }

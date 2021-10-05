@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">dataLayerPractice</string>
+    <string name="send_button_text">SEND BUTTON</string>
 </resources>
