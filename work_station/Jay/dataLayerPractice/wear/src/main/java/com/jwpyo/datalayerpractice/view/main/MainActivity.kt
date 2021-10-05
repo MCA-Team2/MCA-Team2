@@ -42,6 +42,11 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
+        /**
+         * @author Jay
+         * when count data from mobile is received,
+         * below lines are executed
+         */
         dataEvents.forEach { dataEvent ->
             when (dataEvent.type) {
                 TYPE_CHANGED -> {

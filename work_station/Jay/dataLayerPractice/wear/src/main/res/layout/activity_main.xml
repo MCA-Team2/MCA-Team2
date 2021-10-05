@@ -30,7 +30,10 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@{Integer.toString(vm.count)}"
-                android:textSize="32sp" />
+                android:textColor="@color/main"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                tools:text="10" />
 
         </FrameLayout>
 

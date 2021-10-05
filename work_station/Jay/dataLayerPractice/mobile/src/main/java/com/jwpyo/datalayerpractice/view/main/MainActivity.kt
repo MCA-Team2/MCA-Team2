@@ -37,13 +37,15 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
     }
 
     override fun onDataChanged(dataEvent: DataEventBuffer) {
-        // TODO : Declare what to do when notifying that the data layer has changed.
         /**
          * @author Jay
          * mobile 에서 data layer 에 보낸 putInt 요청으로,
          * data layer 에 수정이 일어나면,
          * wear 도 당연히 이벤트[dataEvent]를 수신하지만,
          * mobile 또한 그 이벤트[dataEvent]를 수신합니다.
+         *
+         * wear 에서 녹음 파일을 송신할 것이고,
+         * mobile 에서 수신하는 부분은 여기에!
          */
     }
 
