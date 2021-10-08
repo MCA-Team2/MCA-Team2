@@ -1,16 +1,19 @@
 package com.jwpyo.datalayerpractice.view.main
 
+import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.wearable.*
 import com.google.android.gms.wearable.DataClient.OnDataChangedListener
-import com.google.android.gms.wearable.DataEvent
-import com.google.android.gms.wearable.DataEventBuffer
-import com.google.android.gms.wearable.DataMapItem
-import com.google.android.gms.wearable.Wearable
 import com.jwpyo.datalayerpractice.R
 import com.jwpyo.datalayerpractice.base.BaseActivity
 import com.jwpyo.datalayerpractice.databinding.ActivityMainBinding
 import com.jwpyo.datalayerpractice.utils.Constant
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : BaseActivity(), OnDataChangedListener {
@@ -59,6 +62,10 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
 
                             mainViewModel.count.postValue(count)
                         }
+                        Constant.AUDIO_PATH -> {
+                            val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
+                            val asset = dataMapItem.dataMap.getAsset(Constant.AUDIO_KEY)
+                        }
                         else -> {
                             TODO()
                         }
@@ -77,6 +84,18 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
     private fun setEventListeners() {
         binding.increaseButton.setOnClickListener {
             mainViewModel.plusCount()
+        }
+    }
+
+    private fun loadJob(activity: Activity, asset: Asset): Job {
+        return CoroutineScope(Dispatchers.IO).launch {
+            runCatching {
+                val assetInputStream = Tasks.await(
+                    Wearable.getDataClient(activity).getFdForAsset(asset)
+                ).inputStream
+
+                // TODO> how to manage input stream?
+            }
         }
     }
 }
