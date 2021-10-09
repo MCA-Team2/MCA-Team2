@@ -6,3 +6,4 @@ The works are in the following directories structure and files:
 | ------ | ------ |
 | Jay/countPlusMinus | example "counting with two sources(mobile/wear)" |
 | Jay/dataLayerPractice | example android application to test communication |
+| Cube-c/WearFirstExample | example android application to get heart rate PPG data |
