@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">dataLayerPractice</string>
-    <string name="increase_button_text">+1</string>
+    <string name="database">MCA.db</string>
+    <string name="play_text">play</string>
 </resources>

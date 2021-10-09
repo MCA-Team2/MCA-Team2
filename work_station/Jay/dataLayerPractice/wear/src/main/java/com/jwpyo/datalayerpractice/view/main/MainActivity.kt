@@ -1,8 +1,8 @@
 package com.jwpyo.datalayerpractice.view.main
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
@@ -13,25 +13,23 @@ import com.google.android.gms.fitness.FitnessOptions
 import com.google.android.gms.fitness.data.DataSource
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.request.DataSourcesRequest
-import com.google.android.gms.wearable.DataClient
-import com.google.android.gms.wearable.DataEvent.TYPE_CHANGED
-import com.google.android.gms.wearable.DataEvent.TYPE_DELETED
-import com.google.android.gms.wearable.DataEventBuffer
-import com.google.android.gms.wearable.DataMapItem
-import com.google.android.gms.wearable.Wearable
+import com.google.android.gms.wearable.*
 import com.jwpyo.datalayerpractice.R
 import com.jwpyo.datalayerpractice.base.BaseActivity
 import com.jwpyo.datalayerpractice.databinding.ActivityMainBinding
-import com.jwpyo.datalayerpractice.utils.Constant
+import com.jwpyo.datalayerpractice.utils.PermissionManager
+import com.jwpyo.datalayerpractice.utils.SoundRecorder
+import kotlinx.coroutines.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : BaseActivity(), DataClient.OnDataChangedListener, SensorEventListener {
+class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
 
     private val binding: ActivityMainBinding by binding(R.layout.activity_main)
     private val mainViewModel: MainViewModel by viewModel()
 
-    lateinit var sensorManager: SensorManager
-    lateinit var sensor: Sensor
+    private val permissionManager: PermissionManager by lazy { PermissionManager(this) }
+
+    private var recordingJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,8 +41,11 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener, SensorEve
 
         AmbientModeSupport.attach(this)
 
+        checkPermissions()
+
         setEventListeners()
-        setSensors()
+
+        printAllSensors()
         getGoogleFitClient()
     }
 
@@ -59,56 +60,52 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener, SensorEve
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
-        /**
-         * @author Jay
-         * when count data from mobile/wear is received,
-         * update count data in view model
-         *
-         * exactly same with mobile/MainActivity
-         */
-        Log.d("MainActivity::onDataChanged", "$dataEvents")
+        Log.d(TAG, "hello $dataEvents")
 
-        dataEvents.forEach { dataEvent ->
-            when (dataEvent.type) {
-                TYPE_CHANGED -> {
-                    when (dataEvent.dataItem.uri.path) {
-                        Constant.COUNT_PATH -> {
-                            val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
-                            val count = dataMapItem.dataMap.getInt(Constant.COUNT_KEY)
+//        dataEvents.forEach { dataEvent ->
+//            when (dataEvent.type) {
+//                TYPE_CHANGED -> {
+//                    when (dataEvent.dataItem.uri.path) {
+//                        Constant.COUNT_PATH -> {
+//                            val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
+//                            val count = dataMapItem.dataMap.getInt(Constant.COUNT_KEY)
+//
+//                            mainViewModel.count.postValue(count)
+//                        }
+//                        else -> Unit
+//                    }
+//                }
+//                TYPE_DELETED -> Unit
+//                else -> Unit
+//            }
+//        }
+    }
 
-                            mainViewModel.count.postValue(count)
-                        }
-                        else -> {
-                            TODO()
-                        }
-                    }
-                }
-                TYPE_DELETED -> {
-                    TODO()
-                }
-                else -> {
-                    TODO()
-                }
+    @SuppressLint("MissingPermission")
+    private fun setEventListeners() {
+        binding.recordButton.setOnClickListener {
+            mainViewModel.isRecording.postValue(true)
+            recordingJob = CoroutineScope(Dispatchers.IO).launch {
+                SoundRecorder().record { mainViewModel.sendVoice(it) }
             }
         }
-    }
-
-    override fun onSensorChanged(p0: SensorEvent?) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        TODO("Not yet implemented")
-    }
-
-    private fun setEventListeners() {
-        binding.decreaseButton.setOnClickListener {
-            mainViewModel.minusCount()
+        binding.stopButton.setOnClickListener {
+            mainViewModel.isRecording.postValue(false)
+            recordingJob?.cancel()
         }
     }
 
-    private fun setSensors() {
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+    private fun checkPermissions() {
+        permissionManager.assertPermissionOrRequest(Manifest.permission.RECORD_AUDIO)
+    }
+
+
+    /**
+     * Experimental works ...
+     */
+
+    private fun printAllSensors() {
+        val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         sensorManager.getSensorList(Sensor.TYPE_ALL).toList().forEach { sensor ->
             Log.d(TAG, "hello name = ${sensor.name} / type = ${sensor.type}")
         }

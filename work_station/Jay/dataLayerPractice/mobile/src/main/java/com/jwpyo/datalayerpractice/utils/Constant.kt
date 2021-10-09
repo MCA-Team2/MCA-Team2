@@ -6,4 +6,5 @@ object Constant {
 
     const val AUDIO_PATH = "/audio"
     const val AUDIO_KEY = "record"
+    const val TIME_KEY = "time"
 }

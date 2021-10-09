@@ -1,5 +1,9 @@
 package com.jwpyo.datalayerpractice.repository
 
-interface VoiceRepository {
+import com.jwpyo.datalayerpractice.model.voice.Voice
+import kotlinx.coroutines.flow.Flow
 
+interface VoiceRepository {
+    fun getVoices(): Flow<List<Voice>>
+    fun insertVoice(voice: Voice): Long
 }

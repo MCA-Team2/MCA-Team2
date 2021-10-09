@@ -19,10 +19,15 @@ package com.jwpyo.datalayerpractice.persistence.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.Query
 import com.jwpyo.datalayerpractice.model.voice.Voice
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface VoiceDao {
     @Insert
     fun insert(voice: Voice): Long
+
+    @Query("SELECT * FROM Voice")
+    fun getVoices(): Flow<List<Voice>>
 }

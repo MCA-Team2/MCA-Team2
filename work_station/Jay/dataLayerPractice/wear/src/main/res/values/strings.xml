@@ -6,4 +6,6 @@
     -->
     <string name="hello_world">Hello Square World!</string>
     <string name="decrease_button_text">-1</string>
+    <string name="record_text">record</string>
+    <string name="stop_text">stop</string>
 </resources>

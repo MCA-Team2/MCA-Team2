@@ -1,28 +1,33 @@
 package com.jwpyo.datalayerpractice.view.main
 
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.tasks.Task
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.DataClient
-import com.google.android.gms.wearable.DataItem
-import com.google.android.gms.wearable.PutDataMapRequest
-import com.jwpyo.datalayerpractice.utils.Constant
+import com.jwpyo.datalayerpractice.extensions.getByteArrayFromAsset
+import com.jwpyo.datalayerpractice.model.ui.VoiceItem
+import com.jwpyo.datalayerpractice.model.voice.Voice
+import com.jwpyo.datalayerpractice.repository.VoiceRepository
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import org.threeten.bp.LocalDateTime
 
 class MainViewModel(
-    private val dataClient: DataClient
+    private val dataClient: DataClient,
+    private val voiceRepository: VoiceRepository
 ) : ViewModel() {
-    val count = MutableLiveData<Int>()
+    val voiceItems: LiveData<List<VoiceItem>> =
+        voiceRepository.getVoices().map {
+            it.map { voice -> VoiceItem(voice) }
+        }.asLiveData()
 
-    fun plusCount(): Task<DataItem> {
-        val putDataMapRequest = PutDataMapRequest.create(Constant.COUNT_PATH).apply {
-            val newCount = count.value?.plus(1) ?: 0
-            dataMap.putInt(Constant.COUNT_KEY, newCount)
+    fun insertVoice(asset: Asset, ldt: LocalDateTime) =
+        viewModelScope.launch {
+            voiceRepository.insertVoice(
+                Voice(null, ldt, dataClient.getByteArrayFromAsset(asset))
+            )
         }
 
-        val request = putDataMapRequest.asPutDataRequest().apply {
-            setUrgent()
-        }
-
-        return dataClient.putDataItem(request)
-    }
 }
