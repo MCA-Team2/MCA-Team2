@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
+        <import type="android.view.View" />
 
         <variable
             name="vm"
@@ -25,27 +26,29 @@
             android:padding="@dimen/inner_frame_layout_padding"
             app:layout_boxedEdges="all">
 
-            <TextView
-                android:id="@+id/count_text"
+            <Button
+                android:id="@+id/record_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top|center_horizontal"
+                android:background="@color/main"
                 android:gravity="center"
-                android:textColor="@color/main"
-                android:textSize="24sp"
+                android:text="@string/record_text"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                bind:count_text="@{vm.count}"
-                tools:text="count = 10" />
+                android:visibility="@{vm.isRecording ? View.GONE : View.VISIBLE}" />
 
             <Button
-                android:id="@+id/decrease_button"
+                android:id="@+id/stop_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|center_horizontal"
+                android:background="@color/main"
                 android:gravity="center"
-                android:text="@string/decrease_button_text"
+                android:text="@string/stop_text"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="@{vm.isRecording ? View.VISIBLE : View.GONE}" />
 
         </FrameLayout>
 
