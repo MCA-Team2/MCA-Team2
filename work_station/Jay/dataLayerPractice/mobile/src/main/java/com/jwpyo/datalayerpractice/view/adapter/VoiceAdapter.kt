@@ -5,13 +5,15 @@ import android.view.View
 import com.jwpyo.datalayerpractice.R
 import com.jwpyo.datalayerpractice.model.ui.VoiceItem
 import com.jwpyo.datalayerpractice.utils.SoundPlayer
+import com.jwpyo.datalayerpractice.view.main.MainViewModel
 import com.jwpyo.datalayerpractice.view.viewholder.VoiceViewHolder
 import com.skydoves.baserecyclerviewadapter.BaseAdapter
 import com.skydoves.baserecyclerviewadapter.BaseViewHolder
 import com.skydoves.baserecyclerviewadapter.SectionRow
 
 class VoiceAdapter(
-    private val soundPlayer: SoundPlayer
+    private val viewModel: MainViewModel,
+    private val soundPlayer: SoundPlayer,
 ) : BaseAdapter() {
     init {
         addSection(arrayListOf<Any>())
@@ -29,7 +31,7 @@ class VoiceAdapter(
 
     override fun viewHolder(layout: Int, view: View): BaseViewHolder {
         when (layout) {
-            R.layout.item_voice -> return VoiceViewHolder(view, soundPlayer)
+            R.layout.item_voice -> return VoiceViewHolder(view, viewModel, soundPlayer)
             else -> throw Resources.NotFoundException("not founded layout")
         }
 

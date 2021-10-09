@@ -23,7 +23,7 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
         super.onCreate(savedInstanceState)
 
         binding.apply {
-            adapter = VoiceAdapter(get())
+            adapter = VoiceAdapter(mainViewModel, get())
             vm = mainViewModel
             lifecycleOwner = this@MainActivity
         }

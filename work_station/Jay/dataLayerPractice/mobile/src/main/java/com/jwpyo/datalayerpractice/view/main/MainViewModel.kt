@@ -1,9 +1,6 @@
 package com.jwpyo.datalayerpractice.view.main
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.DataClient
 import com.jwpyo.datalayerpractice.extensions.getByteArrayFromAsset
@@ -23,10 +20,17 @@ class MainViewModel(
             it.map { voice -> VoiceItem(voice) }
         }.asLiveData()
 
-    fun insertVoice(asset: Asset, ldt: LocalDateTime) =
+    val isPlayingMap: MutableMap<Long, MutableLiveData<Boolean>> = mutableMapOf()
+
+    fun insertVoice(asset: Asset, ldt: LocalDateTime) {
         viewModelScope.launch {
             voiceRepository.insertVoice(
                 Voice(null, ldt, dataClient.getByteArrayFromAsset(asset))
             )
         }
+    }
+
+    fun deleteVoice(voice: Voice) {
+        voiceRepository.deleteVoice(voice)
+    }
 }

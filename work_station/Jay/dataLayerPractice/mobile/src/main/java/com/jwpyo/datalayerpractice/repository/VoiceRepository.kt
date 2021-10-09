@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface VoiceRepository {
     fun getVoices(): Flow<List<Voice>>
     fun insertVoice(voice: Voice): Long
+    fun deleteVoice(voice: Voice)
 }

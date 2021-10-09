@@ -14,4 +14,8 @@ class VoiceRepositoryImpl(
     override fun insertVoice(voice: Voice): Long {
         return voiceDao.insert(voice)
     }
+
+    override fun deleteVoice(voice: Voice) {
+        return voiceDao.delete(voice)
+    }
 }

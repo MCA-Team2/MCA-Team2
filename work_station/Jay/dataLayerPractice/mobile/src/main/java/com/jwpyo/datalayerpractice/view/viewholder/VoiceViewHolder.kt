@@ -1,10 +1,14 @@
 package com.jwpyo.datalayerpractice.view.viewholder
 
+import android.util.Log
 import android.view.View
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
 import com.jwpyo.datalayerpractice.base.BaseBindingViewHolder
 import com.jwpyo.datalayerpractice.databinding.ItemVoiceBinding
 import com.jwpyo.datalayerpractice.model.ui.VoiceItem
 import com.jwpyo.datalayerpractice.utils.SoundPlayer
+import com.jwpyo.datalayerpractice.view.main.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,10 +17,11 @@ import java.io.ByteArrayInputStream
 
 class VoiceViewHolder(
     view: View,
-    private val soundPlayer: SoundPlayer
+    private val viewModel: MainViewModel,
+    private val soundPlayer: SoundPlayer,
 ) : BaseBindingViewHolder<ItemVoiceBinding>(view) {
     private var playingJob: Job? = null
-    private var isPlaying = false
+    private var isPlayingLiveData: MutableLiveData<Boolean>? = null
 
     override fun bindData(data: Any) {
         if (data is VoiceItem) {
@@ -24,23 +29,46 @@ class VoiceViewHolder(
                 item = data
             }
 
-            binding.mediaButton.setOnClickListener {
-                isPlaying = !isPlaying
+            isPlayingLiveData = viewModel.isPlayingMap[data.voice.id]
+            if (isPlayingLiveData == null) {
+                viewModel.isPlayingMap[data.voice.id!!] = MutableLiveData(false).also {
+                    isPlayingLiveData = it
+                }
+            }
 
+            setEventListeners(data)
+            setObservers(data)
+        }
+    }
+
+    private fun setEventListeners(voiceItem: VoiceItem) {
+        binding.mediaButton.setOnClickListener {
+            isPlayingLiveData?.postValue(isPlayingLiveData?.value == false)
+        }
+
+        binding.deleteButton.setOnClickListener {
+            viewModel.deleteVoice(voiceItem.voice)
+        }
+    }
+
+    private fun setObservers(voiceItem: VoiceItem) {
+        Log.d("hello", "hello 11")
+        val lifecycleOwner = view.context as LifecycleOwner
+
+        Log.d("hello", "hello 22 $isPlayingLiveData")
+        isPlayingLiveData?.let { isPlayingLiveData ->
+            isPlayingLiveData.observe(lifecycleOwner) { isPlaying ->
+                Log.d("hello", "hello 33")
                 if (isPlaying) {
                     binding.mediaButton.text = "stop"
-                    playingJob = CoroutineScope(Dispatchers.IO).launch { play(data) }
+                    playingJob = CoroutineScope(Dispatchers.IO).launch { play(voiceItem) }
                     playingJob?.invokeOnCompletion {
                         CoroutineScope(Dispatchers.Main).launch {
                             binding.mediaButton.text = "play"
-                            isPlaying = false
+                            isPlayingLiveData.postValue(false)
                         }
                     }
                 } else stop()
-            }
-
-            binding.deleteButton.setOnClickListener {
-
             }
         }
     }
