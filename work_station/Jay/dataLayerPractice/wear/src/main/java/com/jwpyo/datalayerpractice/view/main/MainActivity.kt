@@ -60,7 +60,7 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
-        Log.d(TAG, "hello $dataEvents")
+        Log.d("hello", "hello $dataEvents")
 
 //        dataEvents.forEach { dataEvent ->
 //            when (dataEvent.type) {
@@ -107,7 +107,7 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
     private fun printAllSensors() {
         val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         sensorManager.getSensorList(Sensor.TYPE_ALL).toList().forEach { sensor ->
-            Log.d(TAG, "hello name = ${sensor.name} / type = ${sensor.type}")
+            Log.d("hello", "hello name = ${sensor.name} / type = ${sensor.type}")
         }
     }
 
@@ -127,20 +127,16 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
             )
             .addOnSuccessListener { dataSources ->
                 dataSources.forEach {
-                    Log.i(TAG, "hello Data source found: ${it.streamIdentifier}")
-                    Log.i(TAG, "hello Data Source type: ${it.dataType.name}")
+                    Log.i("hello", "hello Data source found: ${it.streamIdentifier}")
+                    Log.i("hello", "hello Data Source type: ${it.dataType.name}")
 
                     if (it.dataType == DataType.TYPE_STEP_COUNT_DELTA) {
-                        Log.i(TAG, "hello Data source for STEP_COUNT_DELTA found!")
+                        Log.i("hello", "hello Data source for STEP_COUNT_DELTA found!")
                     }
                 }
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "hello Find data sources request failed", e)
+                Log.e("hello", "hello Find data sources request failed", e)
             }
-    }
-
-    companion object {
-        const val TAG = "JAEWOO TEST"
     }
 }

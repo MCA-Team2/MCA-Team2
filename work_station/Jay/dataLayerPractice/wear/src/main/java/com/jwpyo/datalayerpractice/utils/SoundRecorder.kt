@@ -4,9 +4,7 @@ import android.Manifest
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.util.Log
 import androidx.annotation.RequiresPermission
-import com.jwpyo.datalayerpractice.view.main.MainActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -51,7 +49,6 @@ class SoundRecorder {
                 val buffer = ByteArray(intSize)
                 while (isActive) {
                     val read = audioRecord.read(buffer, 0, buffer.size)
-                    Log.d(MainActivity.TAG, "hello $read, ${result.size}, ${buffer.size}")
                     result += buffer.copyOfRange(0, read)
                 }
             }

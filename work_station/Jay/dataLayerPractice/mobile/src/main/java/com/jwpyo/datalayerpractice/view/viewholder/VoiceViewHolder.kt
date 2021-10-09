@@ -1,6 +1,5 @@
 package com.jwpyo.datalayerpractice.view.viewholder
 
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
@@ -52,13 +51,10 @@ class VoiceViewHolder(
     }
 
     private fun setObservers(voiceItem: VoiceItem) {
-        Log.d("hello", "hello 11")
         val lifecycleOwner = view.context as LifecycleOwner
 
-        Log.d("hello", "hello 22 $isPlayingLiveData")
         isPlayingLiveData?.let { isPlayingLiveData ->
             isPlayingLiveData.observe(lifecycleOwner) { isPlaying ->
-                Log.d("hello", "hello 33")
                 if (isPlaying) {
                     binding.mediaButton.text = "stop"
                     playingJob = CoroutineScope(Dispatchers.IO).launch { play(voiceItem) }
