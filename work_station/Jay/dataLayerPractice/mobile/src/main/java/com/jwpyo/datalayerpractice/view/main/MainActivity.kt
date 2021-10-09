@@ -10,6 +10,7 @@ import com.jwpyo.datalayerpractice.databinding.ActivityMainBinding
 import com.jwpyo.datalayerpractice.extensions.showToast
 import com.jwpyo.datalayerpractice.utils.Constant
 import com.jwpyo.datalayerpractice.view.adapter.VoiceAdapter
+import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.threeten.bp.LocalDateTime
 
@@ -22,7 +23,7 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
         super.onCreate(savedInstanceState)
 
         binding.apply {
-            adapter = VoiceAdapter()
+            adapter = VoiceAdapter(get())
             vm = mainViewModel
             lifecycleOwner = this@MainActivity
         }
@@ -39,6 +40,7 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
+        Log.d("hello", "hello $dataEvents")
         dataEvents.forEach { dataEvent ->
             when (dataEvent.type) {
                 DataEvent.TYPE_CHANGED -> {

@@ -29,5 +29,4 @@ class MainViewModel(
                 Voice(null, ldt, dataClient.getByteArrayFromAsset(asset))
             )
         }
-
 }

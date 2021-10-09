@@ -2,4 +2,5 @@
     <string name="app_name">dataLayerPractice</string>
     <string name="database">MCA.db</string>
     <string name="play_text">play</string>
+    <string name="delete_text">del</string>
 </resources>

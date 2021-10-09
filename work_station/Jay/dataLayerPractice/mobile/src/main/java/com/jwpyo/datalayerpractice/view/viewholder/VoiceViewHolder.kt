@@ -4,10 +4,18 @@ import android.view.View
 import com.jwpyo.datalayerpractice.base.BaseBindingViewHolder
 import com.jwpyo.datalayerpractice.databinding.ItemVoiceBinding
 import com.jwpyo.datalayerpractice.model.ui.VoiceItem
+import com.jwpyo.datalayerpractice.utils.SoundPlayer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.io.ByteArrayInputStream
 
 class VoiceViewHolder(
     view: View,
+    private val soundPlayer: SoundPlayer
 ) : BaseBindingViewHolder<ItemVoiceBinding>(view) {
+    private var playingJob: Job? = null
     private var isPlaying = false
 
     override fun bindData(data: Any) {
@@ -20,21 +28,32 @@ class VoiceViewHolder(
                 isPlaying = !isPlaying
 
                 if (isPlaying) {
-                    play(data)
                     binding.mediaButton.text = "stop"
-                } else {
-                    stop(data)
-                    binding.mediaButton.text = "play"
-                }
+                    playingJob = CoroutineScope(Dispatchers.IO).launch { play(data) }
+                    playingJob?.invokeOnCompletion {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            binding.mediaButton.text = "play"
+                            isPlaying = false
+                        }
+                    }
+                } else stop()
+            }
+
+            binding.deleteButton.setOnClickListener {
+
             }
         }
     }
 
-    private fun play(voiceItem: VoiceItem) {
-
+    private suspend fun play(voiceItem: VoiceItem) {
+        val byteArray = voiceItem.voice.array
+        val inputStream = ByteArrayInputStream(byteArray)
+        soundPlayer.play(inputStream)
+        stop()
     }
 
-    private fun stop(voiceItem: VoiceItem) {
-
+    private fun stop() {
+        playingJob?.cancel()
+        playingJob = null
     }
 }

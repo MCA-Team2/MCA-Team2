@@ -24,7 +24,7 @@ class SoundPlayer {
      */
     suspend fun play(inputStream: InputStream) {
         if (state != State.IDLE) {
-            // Requesting to play while state was not IDLE"
+            // Requesting to play while state was not IDLE
             return
         }
 
