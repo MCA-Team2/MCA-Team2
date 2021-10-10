@@ -13,6 +13,7 @@ import com.google.android.gms.fitness.FitnessOptions
 import com.google.android.gms.fitness.data.DataSource
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.request.DataSourcesRequest
+import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import com.jwpyo.datalayerpractice.R
 import com.jwpyo.datalayerpractice.base.BaseActivity
@@ -86,7 +87,17 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
         binding.recordButton.setOnClickListener {
             mainViewModel.isRecording.postValue(true)
             recordingJob = CoroutineScope(Dispatchers.IO).launch {
-                SoundRecorder().record { mainViewModel.sendVoice(it) }
+                SoundRecorder().record {
+                    val nodeList =
+                        Tasks.await(Wearable.getNodeClient(this@MainActivity).connectedNodes)
+                    if (nodeList.size > 0) {
+                        mainViewModel.statusText.postValue("connected")
+                        mainViewModel.sendVoice(it)
+                    }
+                    else {
+                        mainViewModel.statusText.postValue("disconnected")
+                    }
+                }
             }
         }
         binding.stopButton.setOnClickListener {

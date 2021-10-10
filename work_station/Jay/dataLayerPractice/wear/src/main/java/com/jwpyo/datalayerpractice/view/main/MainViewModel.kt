@@ -9,12 +9,12 @@ import com.google.android.gms.wearable.DataItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.jwpyo.datalayerpractice.utils.Constant
 import org.threeten.bp.LocalDateTime
-import java.util.*
 
 class MainViewModel(
     private val dataClient: DataClient
 ) : ViewModel() {
     val isRecording = MutableLiveData(false)
+    val statusText = MutableLiveData("")
 
     fun sendVoice(voice: ByteArray): Task<DataItem> {
         val putDataMapRequest = PutDataMapRequest.create(Constant.AUDIO_PATH).apply {
