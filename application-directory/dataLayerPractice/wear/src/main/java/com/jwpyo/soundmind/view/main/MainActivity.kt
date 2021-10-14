@@ -1,4 +1,4 @@
-package com.jwpyo.datalayerpractice.view.main
+package com.jwpyo.soundmind.view.main
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -15,11 +15,11 @@ import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.request.DataSourcesRequest
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
-import com.jwpyo.datalayerpractice.R
-import com.jwpyo.datalayerpractice.base.BaseActivity
-import com.jwpyo.datalayerpractice.databinding.ActivityMainBinding
-import com.jwpyo.datalayerpractice.utils.PermissionManager
-import com.jwpyo.datalayerpractice.utils.SoundRecorder
+import com.jwpyo.soundmind.R
+import com.jwpyo.soundmind.base.BaseActivity
+import com.jwpyo.soundmind.databinding.ActivityMainBinding
+import com.jwpyo.soundmind.utils.PermissionManager
+import com.jwpyo.soundmind.utils.SoundRecorder
 import kotlinx.coroutines.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

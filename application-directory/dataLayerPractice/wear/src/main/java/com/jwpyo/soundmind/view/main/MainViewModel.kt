@@ -1,4 +1,4 @@
-package com.jwpyo.datalayerpractice.view.main
+package com.jwpyo.soundmind.view.main
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,7 +7,7 @@ import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.DataItem
 import com.google.android.gms.wearable.PutDataMapRequest
-import com.jwpyo.datalayerpractice.utils.Constant
+import com.jwpyo.soundmind.utils.Constant
 import org.threeten.bp.LocalDateTime
 
 class MainViewModel(
