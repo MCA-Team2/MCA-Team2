@@ -2,17 +2,14 @@ package com.jwpyo.soundmind.view.main
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import androidx.wear.ambient.AmbientModeSupport
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.fitness.Fitness
-import com.google.android.gms.fitness.FitnessOptions
-import com.google.android.gms.fitness.data.DataSource
-import com.google.android.gms.fitness.data.DataType
-import com.google.android.gms.fitness.request.DataSourcesRequest
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import com.jwpyo.soundmind.R
@@ -23,13 +20,17 @@ import com.jwpyo.soundmind.utils.SoundRecorder
 import kotlinx.coroutines.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
+class MainActivity : BaseActivity(), DataClient.OnDataChangedListener, SensorEventListener {
 
     private val binding: ActivityMainBinding by binding(R.layout.activity_main)
     private val mainViewModel: MainViewModel by viewModel()
 
+    // Variable for PPG Sensing
     private val permissionManager: PermissionManager by lazy { PermissionManager(this) }
+    private lateinit var mSensorManager: SensorManager
+    private val mHeartSensors: ArrayList<Sensor> by lazy { checkAllSensors() } // PPG > PPG_Raw > PPG_SPO2 > PPG_SDNN > PPG_HD > PPG_Static > PPG_BG > PPG_SPO2_BG > PPG_SDNN_BG
 
+    // Variable for Vocie Recording
     private var recordingJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,21 +44,57 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
         AmbientModeSupport.attach(this)
 
         checkPermissions()
-
         setEventListeners()
-
-        printAllSensors()
-        getGoogleFitClient()
     }
 
     override fun onResume() {
         super.onResume()
         Wearable.getDataClient(this).addListener(this)
+
+        for(mSensor in mHeartSensors){
+            mSensor.also { heart ->
+                mSensorManager.registerListener(this, heart, SensorManager.SENSOR_DELAY_FASTEST)
+            }
+        }
     }
 
     override fun onPause() {
         super.onPause()
         Wearable.getDataClient(this).removeListener(this)
+        mSensorManager.unregisterListener(this)
+    }
+
+    private fun checkPermissions() {
+        permissionManager.assertPermissionOrRequest(Manifest.permission.RECORD_AUDIO)
+        permissionManager.assertPermissionOrRequest(Manifest.permission.BODY_SENSORS)
+    }
+
+    private fun checkAllSensors(): ArrayList<Sensor> {
+        mSensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+
+        val heartSensors: ArrayList<Sensor> = ArrayList<Sensor>()
+        mSensorManager.getSensorList(Sensor.TYPE_ALL).toList().forEach { sensor ->
+            if(sensor.name.contains("PPG")) {
+                if(sensor.name != "Heart Rate HD PPG Raw Data" && sensor.name != "Heart Rate PPG Raw Data"){
+                    Log.d("hello", "Added name = ${sensor.name} / type = ${sensor.type}")
+                    heartSensors.add(sensor)
+                }
+            }
+        }
+        return heartSensors
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+        // TODO : Accuracy가 낮을 때 (0~2)이면 특수한 조치?
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        // TODO : 감지된 센서 데이터를 voice와 함께 기록한다.
+        if(event.sensor in mHeartSensors){
+            val value = event?.values?.get(0)
+            if (value != null)
+                Log.d("MCA", event.timestamp.toString() + " [" + event.sensor.name.toString() + "] : " + value.toString() + " (Accuracy: " + event.accuracy + ")")
+        }
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
@@ -106,48 +143,4 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
         }
     }
 
-    private fun checkPermissions() {
-        permissionManager.assertPermissionOrRequest(Manifest.permission.RECORD_AUDIO)
-    }
-
-
-    /**
-     * Experimental works ...
-     */
-
-    private fun printAllSensors() {
-        val sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        sensorManager.getSensorList(Sensor.TYPE_ALL).toList().forEach { sensor ->
-            Log.d("hello", "hello name = ${sensor.name} / type = ${sensor.type}")
-        }
-    }
-
-    private fun getGoogleFitClient() {
-        val fitnessOptions =
-            FitnessOptions.builder().addDataType(DataType.TYPE_STEP_COUNT_DELTA).build()
-
-        // Note: Fitness.SensorsApi.findDataSources() requires the
-        // ACCESS_FINE_LOCATION permission.
-
-        Fitness.getSensorsClient(this, GoogleSignIn.getAccountForExtension(this, fitnessOptions))
-            .findDataSources(
-                DataSourcesRequest.Builder()
-                    .setDataTypes(DataType.TYPE_STEP_COUNT_DELTA)
-                    .setDataSourceTypes(DataSource.TYPE_RAW)
-                    .build()
-            )
-            .addOnSuccessListener { dataSources ->
-                dataSources.forEach {
-                    Log.i("hello", "hello Data source found: ${it.streamIdentifier}")
-                    Log.i("hello", "hello Data Source type: ${it.dataType.name}")
-
-                    if (it.dataType == DataType.TYPE_STEP_COUNT_DELTA) {
-                        Log.i("hello", "hello Data source for STEP_COUNT_DELTA found!")
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("hello", "hello Find data sources request failed", e)
-            }
-    }
 }
