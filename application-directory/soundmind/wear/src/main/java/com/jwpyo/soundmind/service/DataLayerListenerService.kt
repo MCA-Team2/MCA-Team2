@@ -13,8 +13,9 @@ class DataLayerListenerService: WearableListenerService() {
         when(messageEvent.path) {
             START_ACTIVITY_PATH -> {
                 val startIntent = Intent(this, MainActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     putExtra("keep", true)
                 }
 
@@ -22,8 +23,9 @@ class DataLayerListenerService: WearableListenerService() {
             }
             STOP_ACTIVITY_PATH -> {
                 val startIntent = Intent(this, MainActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     putExtra("keep", false)
                 }
                 startActivity(startIntent)

@@ -48,18 +48,6 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
 
         printAllSensors()
         getGoogleFitClient()
-
-
-        val keep = intent.extras!!.getBoolean("keep")
-
-        if (keep) {
-            mainViewModel.isRecording.postValue(true)
-            startRecord()
-        }
-        else {
-            mainViewModel.isRecording.postValue(false)
-            stopRecord()
-        }
     }
 
     override fun onResume() {
@@ -77,6 +65,24 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
 //        stopRecord()
 //        super.onDestroy()
 //    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        val keep = intent?.extras?.getBoolean("keep")
+        binding.logText.text = "intent -> $keep"
+
+        when(keep) {
+            true -> {
+                mainViewModel.isRecording.postValue(true)
+                startRecord()
+            }
+            false -> {
+                mainViewModel.isRecording.postValue(false)
+                stopRecord()
+            }
+            null -> Unit
+        }
+    }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
         Log.d("hello", "hello $dataEvents")

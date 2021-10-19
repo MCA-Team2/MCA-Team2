@@ -31,7 +31,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@{vm.isRecording ? &quot;recording...&quot; : &quot;...&quot;}"
-                tools:text="Disconnected..." />
+                tools:text="recording..." />
+
+            <TextView
+                android:id="@+id/log_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal" />
 
         </FrameLayout>
 
