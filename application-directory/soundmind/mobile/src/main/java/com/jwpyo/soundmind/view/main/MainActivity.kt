@@ -2,6 +2,7 @@ package com.jwpyo.soundmind.view.main
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
@@ -11,6 +12,7 @@ import com.jwpyo.soundmind.base.BaseActivity
 import com.jwpyo.soundmind.databinding.ActivityMainBinding
 import com.jwpyo.soundmind.extensions.showToast
 import com.jwpyo.soundmind.utils.Constant
+import com.jwpyo.soundmind.view.adapter.MainStateAdapter
 import com.jwpyo.soundmind.view.adapter.VoiceAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +30,7 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
         super.onCreate(savedInstanceState)
 
         binding.apply {
-            adapter = VoiceAdapter(mainViewModel, get())
+            stateAdapter = MainStateAdapter(this@MainActivity)
             vm = mainViewModel
             lifecycleOwner = this@MainActivity
         }
@@ -64,40 +66,14 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
     }
 
     private fun setEventListeners() {
-        binding.appStartButton.setOnClickListener {
-            sendMessageToNodes { messageClient, node ->
-                messageClient.sendMessage(node, Constant.START_ACTIVITY_PATH, ByteArray(0))
-            }
+        findViewById<View>(R.id.nav_voice).setOnClickListener {
+            binding.bottomNavigationView.selectedItemId = R.id.nav_voice
         }
-
-        binding.recordStartButton.setOnClickListener {
-            sendMessageToNodes { messageClient, node ->
-                messageClient.sendMessage(node, Constant.START_RECORD_PATH, ByteArray(0))
-            }
+        findViewById<View>(R.id.nav_ppg).setOnClickListener {
+            binding.bottomNavigationView.selectedItemId = R.id.nav_ppg
         }
-
-        binding.recordStopButton.setOnClickListener {
-            sendMessageToNodes { messageClient, node ->
-                messageClient.sendMessage(node, Constant.STOP_RECORD_PATH, ByteArray(0))
-            }
-        }
-    }
-
-    private fun sendMessageToNodes(lambda: (MessageClient, String) -> Task<Int>) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val nodeListTask = Wearable.getNodeClient(applicationContext).connectedNodes
-            val nodes = Tasks.await(nodeListTask)
-            nodes.forEach { node ->
-                val sendMessageTask = lambda(
-                    Wearable.getMessageClient(this@MainActivity),
-                    node.id
-                )
-                runCatching {
-                    Tasks.await(sendMessageTask)
-                }.onFailure {
-                    Log.e("hello", "$it")
-                }
-            }
+        findViewById<View>(R.id.nav_setting).setOnClickListener {
+            binding.bottomNavigationView.selectedItemId = R.id.nav_setting
         }
     }
 

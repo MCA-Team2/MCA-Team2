@@ -2,6 +2,7 @@
 <resources>
     <color name="background">#ddd</color>
     <color name="main">#7c7</color>
+    <color name="sub">#c77</color>
     <color name="font">#333</color>
 
     <color name="black">#FF000000</color>

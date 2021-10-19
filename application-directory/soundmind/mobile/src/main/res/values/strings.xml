@@ -6,4 +6,8 @@
     <string name="start_text">start</string>
     <string name="stop_text">stop</string>
     <string name="app_start_text">app start</string>
+    <string name="more_text">more</string>
+    <string name="voice_page_title">voice</string>
+    <string name="ppg_page_title">ppg</string>
+    <string name="setting_page_title">setting</string>
 </resources>
