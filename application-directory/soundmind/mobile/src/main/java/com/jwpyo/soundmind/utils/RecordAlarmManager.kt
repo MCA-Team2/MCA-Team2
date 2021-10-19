@@ -4,7 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.jwpyo.soundmind.service.RecordStartService
+import com.jwpyo.soundmind.service.StartRecordService
 import org.threeten.bp.LocalTime
 import java.util.*
 
@@ -23,7 +23,7 @@ class RecordAlarmManager(
     private var am: AlarmManager? = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
 
     private fun scheduleRecordStart() {
-        val intent = Intent(context, RecordStartService::class.java)
+        val intent = Intent(context, StartRecordService::class.java)
         cancelPendingIntent(intent, RECORD_SERVICE_ID)
 
         val sender = PendingIntent.getBroadcast(

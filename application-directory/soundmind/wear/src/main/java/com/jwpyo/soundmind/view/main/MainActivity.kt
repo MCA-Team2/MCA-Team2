@@ -13,22 +13,23 @@ import com.google.android.gms.fitness.FitnessOptions
 import com.google.android.gms.fitness.data.DataSource
 import com.google.android.gms.fitness.data.DataType
 import com.google.android.gms.fitness.request.DataSourcesRequest
-import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.BaseActivity
 import com.jwpyo.soundmind.databinding.ActivityMainBinding
+import com.jwpyo.soundmind.utils.AppState
 import com.jwpyo.soundmind.utils.PermissionManager
 import com.jwpyo.soundmind.utils.SoundRecorder
 import kotlinx.coroutines.*
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import android.content.Intent
 
 
 class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
 
     private val binding: ActivityMainBinding by binding(R.layout.activity_main)
     private val mainViewModel: MainViewModel by viewModel()
+    private val appState: AppState by inject()
 
     private val permissionManager: PermissionManager by lazy { PermissionManager(this) }
 
@@ -45,6 +46,7 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
         AmbientModeSupport.attach(this)
 
         checkPermissions()
+        setObservers()
 
         printAllSensors()
         getGoogleFitClient()
@@ -60,28 +62,10 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
         Wearable.getDataClient(this).removeListener(this)
     }
 
-//    override fun onDestroy() {
-//        mainViewModel.isRecording.postValue(false)
-//        stopRecord()
-//        super.onDestroy()
-//    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        val keep = intent?.extras?.getBoolean("keep")
-        binding.logText.text = "intent -> $keep"
-
-        when(keep) {
-            true -> {
-                mainViewModel.isRecording.postValue(true)
-                startRecord()
-            }
-            false -> {
-                mainViewModel.isRecording.postValue(false)
-                stopRecord()
-            }
-            null -> Unit
-        }
+    override fun onDestroy() {
+        mainViewModel.isRecording.postValue(false)
+        stopRecord()
+        super.onDestroy()
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
@@ -92,10 +76,27 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
         permissionManager.assertPermissionOrRequest(Manifest.permission.RECORD_AUDIO)
     }
 
+    private fun setObservers() {
+        appState.recordState.observe(this) {
+            binding.logText.text = "state -> $it"
+            when (it) {
+                true -> {
+                    if (mainViewModel.isRecording.value != true) {
+                        mainViewModel.isRecording.postValue(true)
+                        startRecord()
+                    }
+                }
+                false -> {
+                    mainViewModel.isRecording.postValue(false)
+                    stopRecord()
+                }
+            }
+        }
+    }
+
     @SuppressLint("MissingPermission")
     private fun startRecord() {
-        if (recordingJob != null) return
-
+        stopRecord()
         recordingJob = CoroutineScope(Dispatchers.IO).launch {
             SoundRecorder().record { byteArray, startTime, endTime ->
                 mainViewModel.sendVoice(byteArray, startTime, endTime)

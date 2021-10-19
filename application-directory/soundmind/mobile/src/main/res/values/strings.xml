@@ -5,4 +5,5 @@
     <string name="delete_text">del</string>
     <string name="start_text">start</string>
     <string name="stop_text">stop</string>
+    <string name="app_start_text">app start</string>
 </resources>

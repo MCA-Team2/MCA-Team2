@@ -5,7 +5,8 @@ object Constant {
     const val COUNT_KEY = "count"
 
     const val START_ACTIVITY_PATH = "/start-activity"
-    const val STOP_ACTIVITY_PATH = "/stop-activity"
+    const val START_RECORD_PATH = "/start-record"
+    const val STOP_RECORD_PATH = "/stop-record"
 
     const val AUDIO_PATH = "/audio"
     const val AUDIO_KEY = "record"

@@ -2,6 +2,7 @@ package com.jwpyo.soundmind.view.main
 
 import android.os.Bundle
 import android.util.Log
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import com.google.android.gms.wearable.DataClient.OnDataChangedListener
@@ -63,21 +64,39 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
     }
 
     private fun setEventListeners() {
-        binding.recordStartButton.setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                val nodeListTask = Wearable.getNodeClient(applicationContext).connectedNodes
-                val nodes = Tasks.await(nodeListTask)
+        binding.appStartButton.setOnClickListener {
+            sendMessageToNodes { messageClient, node ->
+                messageClient.sendMessage(node, Constant.START_ACTIVITY_PATH, ByteArray(0))
+            }
+        }
 
-                nodes.forEach { sendStartActivityMessage(it.id) }
+        binding.recordStartButton.setOnClickListener {
+            sendMessageToNodes { messageClient, node ->
+                messageClient.sendMessage(node, Constant.START_RECORD_PATH, ByteArray(0))
             }
         }
 
         binding.recordStopButton.setOnClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                val nodeListTask = Wearable.getNodeClient(applicationContext).connectedNodes
-                val nodes = Tasks.await(nodeListTask)
+            sendMessageToNodes { messageClient, node ->
+                messageClient.sendMessage(node, Constant.STOP_RECORD_PATH, ByteArray(0))
+            }
+        }
+    }
 
-                nodes.forEach { sendStopActivityMessage(it.id) }
+    private fun sendMessageToNodes(lambda: (MessageClient, String) -> Task<Int>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val nodeListTask = Wearable.getNodeClient(applicationContext).connectedNodes
+            val nodes = Tasks.await(nodeListTask)
+            nodes.forEach { node ->
+                val sendMessageTask = lambda(
+                    Wearable.getMessageClient(this@MainActivity),
+                    node.id
+                )
+                runCatching {
+                    Tasks.await(sendMessageTask)
+                }.onFailure {
+                    Log.e("hello", "$it")
+                }
             }
         }
     }
@@ -96,28 +115,4 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
         }.onFailure {
             showToast("$it")
         }
-
-    private fun sendStartActivityMessage(node: String) {
-        val sendMessageTask = Wearable.getMessageClient(this).sendMessage(
-            node, Constant.START_ACTIVITY_PATH, ByteArray(0)
-        )
-
-        runCatching {
-            Tasks.await(sendMessageTask)
-        }.onFailure {
-            Log.e("hello", "$it")
-        }
-    }
-
-    private fun sendStopActivityMessage(node: String) {
-        val sendMessageTask = Wearable.getMessageClient(this).sendMessage(
-            node, Constant.STOP_ACTIVITY_PATH, ByteArray(0)
-        )
-
-        runCatching {
-            Tasks.await(sendMessageTask)
-        }.onFailure {
-            Log.e("hello", "$it")
-        }
-    }
 }
