@@ -2,6 +2,7 @@ package com.jwpyo.soundmind.view.main
 
 import android.os.Bundle
 import android.util.Log
+import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import com.google.android.gms.wearable.DataClient.OnDataChangedListener
 import com.jwpyo.soundmind.R
@@ -10,6 +11,9 @@ import com.jwpyo.soundmind.databinding.ActivityMainBinding
 import com.jwpyo.soundmind.extensions.showToast
 import com.jwpyo.soundmind.utils.Constant
 import com.jwpyo.soundmind.view.adapter.VoiceAdapter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.threeten.bp.LocalDateTime
@@ -27,6 +31,8 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
             vm = mainViewModel
             lifecycleOwner = this@MainActivity
         }
+
+        setEventListeners()
     }
 
     override fun onResume() {
@@ -56,15 +62,62 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
         }
     }
 
+    private fun setEventListeners() {
+        binding.recordStartButton.setOnClickListener {
+            CoroutineScope(Dispatchers.IO).launch {
+                val nodeListTask = Wearable.getNodeClient(applicationContext).connectedNodes
+                val nodes = Tasks.await(nodeListTask)
+
+                nodes.forEach { sendStartActivityMessage(it.id) }
+            }
+        }
+
+        binding.recordStopButton.setOnClickListener {
+            CoroutineScope(Dispatchers.IO).launch {
+                val nodeListTask = Wearable.getNodeClient(applicationContext).connectedNodes
+                val nodes = Tasks.await(nodeListTask)
+
+                nodes.forEach { sendStopActivityMessage(it.id) }
+            }
+        }
+    }
+
     private fun onAudioChangedEvent(dataEvent: DataEvent) =
         runCatching {
             val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
             val asset = dataMapItem.dataMap.getAsset(Constant.AUDIO_KEY)
-            val ldt = LocalDateTime.parse(
-                dataMapItem.dataMap.getString(Constant.TIME_KEY)
+            val startLDT = LocalDateTime.parse(
+                dataMapItem.dataMap.getString(Constant.START_TIME_KEY)
             )
-            mainViewModel.insertVoice(asset!!, ldt)
+            val endLDT = LocalDateTime.parse(
+                dataMapItem.dataMap.getString(Constant.END_TIME_KEY)
+            )
+            mainViewModel.insertVoice(asset!!, startLDT, endLDT)
         }.onFailure {
             showToast("$it")
         }
+
+    private fun sendStartActivityMessage(node: String) {
+        val sendMessageTask = Wearable.getMessageClient(this).sendMessage(
+            node, Constant.START_ACTIVITY_PATH, ByteArray(0)
+        )
+
+        runCatching {
+            Tasks.await(sendMessageTask)
+        }.onFailure {
+            Log.e("hello", "$it")
+        }
+    }
+
+    private fun sendStopActivityMessage(node: String) {
+        val sendMessageTask = Wearable.getMessageClient(this).sendMessage(
+            node, Constant.STOP_ACTIVITY_PATH, ByteArray(0)
+        )
+
+        runCatching {
+            Tasks.await(sendMessageTask)
+        }.onFailure {
+            Log.e("hello", "$it")
+        }
+    }
 }

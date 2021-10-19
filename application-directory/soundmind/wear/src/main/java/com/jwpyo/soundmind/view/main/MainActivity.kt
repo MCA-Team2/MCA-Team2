@@ -22,6 +22,8 @@ import com.jwpyo.soundmind.utils.PermissionManager
 import com.jwpyo.soundmind.utils.SoundRecorder
 import kotlinx.coroutines.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import android.content.Intent
+
 
 class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
 
@@ -44,10 +46,20 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
 
         checkPermissions()
 
-        setEventListeners()
-
         printAllSensors()
         getGoogleFitClient()
+
+
+        val keep = intent.extras!!.getBoolean("keep")
+
+        if (keep) {
+            mainViewModel.isRecording.postValue(true)
+            startRecord()
+        }
+        else {
+            mainViewModel.isRecording.postValue(false)
+            stopRecord()
+        }
     }
 
     override fun onResume() {
@@ -60,54 +72,33 @@ class MainActivity : BaseActivity(), DataClient.OnDataChangedListener {
         Wearable.getDataClient(this).removeListener(this)
     }
 
+//    override fun onDestroy() {
+//        mainViewModel.isRecording.postValue(false)
+//        stopRecord()
+//        super.onDestroy()
+//    }
+
     override fun onDataChanged(dataEvents: DataEventBuffer) {
         Log.d("hello", "hello $dataEvents")
-
-//        dataEvents.forEach { dataEvent ->
-//            when (dataEvent.type) {
-//                TYPE_CHANGED -> {
-//                    when (dataEvent.dataItem.uri.path) {
-//                        Constant.COUNT_PATH -> {
-//                            val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
-//                            val count = dataMapItem.dataMap.getInt(Constant.COUNT_KEY)
-//
-//                            mainViewModel.count.postValue(count)
-//                        }
-//                        else -> Unit
-//                    }
-//                }
-//                TYPE_DELETED -> Unit
-//                else -> Unit
-//            }
-//        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun setEventListeners() {
-        binding.recordButton.setOnClickListener {
-            mainViewModel.isRecording.postValue(true)
-            recordingJob = CoroutineScope(Dispatchers.IO).launch {
-                SoundRecorder().record {
-                    val nodeList =
-                        Tasks.await(Wearable.getNodeClient(this@MainActivity).connectedNodes)
-                    if (nodeList.size > 0) {
-                        mainViewModel.statusText.postValue("connected")
-                        mainViewModel.sendVoice(it)
-                    }
-                    else {
-                        mainViewModel.statusText.postValue("disconnected")
-                    }
-                }
-            }
-        }
-        binding.stopButton.setOnClickListener {
-            mainViewModel.isRecording.postValue(false)
-            recordingJob?.cancel()
-        }
     }
 
     private fun checkPermissions() {
         permissionManager.assertPermissionOrRequest(Manifest.permission.RECORD_AUDIO)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startRecord() {
+        if (recordingJob != null) return
+
+        recordingJob = CoroutineScope(Dispatchers.IO).launch {
+            SoundRecorder().record { byteArray, startTime, endTime ->
+                mainViewModel.sendVoice(byteArray, startTime, endTime)
+            }
+        }
+    }
+
+    private fun stopRecord() {
+        recordingJob?.cancel()
     }
 
 

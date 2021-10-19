@@ -10,7 +10,9 @@ import org.threeten.bp.LocalDateTime
 @Parcelize
 data class Voice(
     @PrimaryKey(autoGenerate = true) val id: Long?,
-    val ldt: LocalDateTime,
+    val receiveLDT: LocalDateTime,
+    val startLDT: LocalDateTime,
+    val endLDT: LocalDateTime,
     val array: ByteArray,
 ) : Parcelable {
     override fun equals(other: Any?): Boolean {

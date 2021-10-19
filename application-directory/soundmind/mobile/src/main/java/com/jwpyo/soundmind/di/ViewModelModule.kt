@@ -10,6 +10,7 @@ val viewModelModule = module {
     viewModel {
         MainViewModel(
             Wearable.getDataClient(androidContext()),
+            get(),
             get()
         )
     }

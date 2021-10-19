@@ -16,11 +16,16 @@ class MainViewModel(
     val isRecording = MutableLiveData(false)
     val statusText = MutableLiveData("")
 
-    fun sendVoice(voice: ByteArray): Task<DataItem> {
+    fun sendVoice(
+        voice: ByteArray,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime
+    ): Task<DataItem> {
         val putDataMapRequest = PutDataMapRequest.create(Constant.AUDIO_PATH).apply {
             val asset = Asset.createFromBytes(voice)
             dataMap.putAsset(Constant.AUDIO_KEY, asset)
-            dataMap.putString(Constant.TIME_KEY, LocalDateTime.now().toString())
+            dataMap.putString(Constant.START_TIME_KEY, startTime.toString())
+            dataMap.putString(Constant.END_TIME_KEY, endTime.toString())
         }
 
         val request = putDataMapRequest.asPutDataRequest().apply {
