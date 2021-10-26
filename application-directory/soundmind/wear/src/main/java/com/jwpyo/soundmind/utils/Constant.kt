@@ -13,5 +13,14 @@ object Constant {
     const val START_TIME_KEY = "start-time"
     const val END_TIME_KEY = "end-time"
 
+    const val PPG_PATH = "/ppg-%s"
+    const val SENSOR_VALUE_KEY = "sensor-value"
+    const val ACCURACY_KEY = "accuracy"
+    const val TIME_STAMP_KEY = "time-stamp"
+
+    const val RECORDING_RATE = 8000 // can go up to 44K, if needed
+    const val AUDIO_CHUNK_SIZE = 80000
+    const val PPG_CHUNK_SIZE = 100
+
     const val REQUEST_PERMISSION_CODE = 2
 }

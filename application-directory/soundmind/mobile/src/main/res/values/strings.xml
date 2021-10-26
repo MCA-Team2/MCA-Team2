@@ -10,4 +10,5 @@
     <string name="voice_page_title">voice</string>
     <string name="ppg_page_title">ppg</string>
     <string name="setting_page_title">setting</string>
+    <string name="enter_text">enter</string>
 </resources>

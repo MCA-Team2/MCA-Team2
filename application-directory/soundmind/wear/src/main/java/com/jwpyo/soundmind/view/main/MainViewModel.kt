@@ -21,11 +21,37 @@ class MainViewModel(
         startTime: LocalDateTime,
         endTime: LocalDateTime
     ): Task<DataItem> {
-        val putDataMapRequest = PutDataMapRequest.create(Constant.AUDIO_PATH).apply {
+        val putDataMapRequest = PutDataMapRequest.create(
+            Constant.AUDIO_PATH
+        ).apply {
             val asset = Asset.createFromBytes(voice)
             dataMap.putAsset(Constant.AUDIO_KEY, asset)
             dataMap.putString(Constant.START_TIME_KEY, startTime.toString())
             dataMap.putString(Constant.END_TIME_KEY, endTime.toString())
+        }
+
+        val request = putDataMapRequest.asPutDataRequest().apply {
+            setUrgent()
+        }
+
+        return dataClient.putDataItem(request)
+    }
+
+    fun sendPPG(
+        sensorName: String,
+        sensorValue: FloatArray,
+        accuracy: LongArray,
+        timestamp: LongArray,
+    ): Task<DataItem> {
+        if (sensorValue.size != accuracy.size || sensorValue.size != timestamp.size)
+            throw Exception("sizes are inappropriate : ${sensorValue.size}, ${accuracy.size}, ${timestamp.size}")
+
+        val putDataMapRequest = PutDataMapRequest.create(
+            Constant.PPG_PATH.format(sensorName)
+        ).apply {
+            dataMap.putFloatArray(Constant.SENSOR_VALUE_KEY, sensorValue)
+            dataMap.putLongArray(Constant.ACCURACY_KEY, accuracy)
+            dataMap.putLongArray(Constant.TIME_STAMP_KEY, timestamp)
         }
 
         val request = putDataMapRequest.asPutDataRequest().apply {

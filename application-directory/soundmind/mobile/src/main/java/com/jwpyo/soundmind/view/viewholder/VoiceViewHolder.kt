@@ -4,10 +4,8 @@ import android.view.View
 import androidx.lifecycle.LifecycleOwner
 import com.jwpyo.soundmind.base.BaseBindingViewHolder
 import com.jwpyo.soundmind.databinding.ItemVoiceBinding
-import com.jwpyo.soundmind.extensions.show
 import com.jwpyo.soundmind.model.ui.VoiceItem
 import com.jwpyo.soundmind.view.main.MainViewModel
-import com.jwpyo.soundmind.view.main.SensorDetailDialog
 
 class VoiceViewHolder(
     view: View,

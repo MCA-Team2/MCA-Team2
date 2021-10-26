@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.DatabindingFragment
 import com.jwpyo.soundmind.databinding.FragmentPpgBinding
+import com.jwpyo.soundmind.view.adapter.PPGAdapter
 import com.jwpyo.soundmind.view.main.MainViewModel
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
@@ -24,6 +25,7 @@ class PPGFragment : DatabindingFragment() {
             R.layout.fragment_ppg,
             container
         ).apply {
+            adapter = PPGAdapter(viewModel)
             vm = viewModel
             lifecycleOwner = viewLifecycleOwner
             this@PPGFragment.binding = this

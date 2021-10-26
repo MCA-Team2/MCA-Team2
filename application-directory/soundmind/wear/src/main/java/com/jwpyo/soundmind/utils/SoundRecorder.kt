@@ -5,6 +5,8 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import androidx.annotation.RequiresPermission
+import com.jwpyo.soundmind.utils.Constant.AUDIO_CHUNK_SIZE
+import com.jwpyo.soundmind.utils.Constant.RECORDING_RATE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -53,13 +55,13 @@ class SoundRecorder {
                     val read = audioRecord.read(buffer, 0, buffer.size)
                     result += buffer.copyOfRange(0, read)
 
-                    if (result.size > CHUNK_SIZE) {
+                    if (result.size > AUDIO_CHUNK_SIZE) {
                         onSend(
-                            result.copyOfRange(0, CHUNK_SIZE),
+                            result.copyOfRange(0, AUDIO_CHUNK_SIZE),
                             startTime,
                             LocalDateTime.now().also { startTime = it }
                         )
-                        result = result.copyOfRange(CHUNK_SIZE, result.size)
+                        result = result.copyOfRange(AUDIO_CHUNK_SIZE, result.size)
                     }
                 }
             }
@@ -71,10 +73,8 @@ class SoundRecorder {
     }
 
     companion object {
-        private const val RECORDING_RATE = 8000 // can go up to 44K, if needed
         private const val CHANNEL_IN = AudioFormat.CHANNEL_IN_MONO
         private const val CHANNELS_OUT = AudioFormat.CHANNEL_OUT_MONO
         private const val FORMAT = AudioFormat.ENCODING_PCM_16BIT
-        private const val CHUNK_SIZE: Int = 80000
     }
 }

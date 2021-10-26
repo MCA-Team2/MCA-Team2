@@ -13,4 +13,8 @@ object Constant {
     const val START_TIME_KEY = "start-time"
     const val END_TIME_KEY = "end-time"
 
+    const val PPG_PATH_PREFIX = "/ppg-"
+    const val SENSOR_VALUE_KEY = "sensor-value"
+    const val ACCURACY_KEY = "accuracy"
+    const val TIME_STAMP_KEY = "time-stamp"
 }

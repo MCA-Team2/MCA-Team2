@@ -71,5 +71,8 @@ dependencies {
     // adapter
     implementation "com.github.skydoves:baserecyclerviewadapter:0.1.3"
 
+    // mp android chart
+//    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
     wearApp project(":wear")
 }
