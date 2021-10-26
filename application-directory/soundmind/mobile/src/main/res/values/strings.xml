@@ -1,6 +1,14 @@
 <resources>
-    <string name="app_name">dataLayerPractice</string>
+    <string name="app_name">soundmind</string>
     <string name="database">MCA.db</string>
     <string name="play_text">play</string>
     <string name="delete_text">del</string>
+    <string name="start_text">start</string>
+    <string name="stop_text">stop</string>
+    <string name="app_start_text">app start</string>
+    <string name="more_text">more</string>
+    <string name="voice_page_title">voice</string>
+    <string name="ppg_page_title">ppg</string>
+    <string name="setting_page_title">setting</string>
+    <string name="enter_text">enter</string>
 </resources>

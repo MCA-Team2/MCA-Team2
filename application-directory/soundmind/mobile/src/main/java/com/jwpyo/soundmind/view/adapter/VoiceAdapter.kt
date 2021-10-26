@@ -31,7 +31,7 @@ class VoiceAdapter(
 
     override fun viewHolder(layout: Int, view: View): BaseViewHolder {
         when (layout) {
-            R.layout.item_voice -> return VoiceViewHolder(view, viewModel, soundPlayer)
+            R.layout.item_voice -> return VoiceViewHolder(view, viewModel)
             else -> throw Resources.NotFoundException("not founded layout")
         }
 

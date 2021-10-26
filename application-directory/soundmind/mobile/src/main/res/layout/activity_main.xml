@@ -6,8 +6,8 @@
     <data>
 
         <variable
-            name="adapter"
-            type="com.jwpyo.soundmind.view.adapter.VoiceAdapter" />
+            name="stateAdapter"
+            type="com.jwpyo.soundmind.view.adapter.MainStateAdapter" />
 
         <variable
             name="vm"
@@ -20,22 +20,25 @@
         android:layout_height="match_parent"
         android:background="@color/background">
 
-        <ScrollView
-            app:layout_constraintTop_toTopOf="parent"
+        <androidx.viewpager2.widget.ViewPager2
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:overScrollMode="never"
+            bind:bindNavigation="@{bottomNavigationView}"
+            bind:pageLimit="@{1}"
+            bind:pagerAdapter="@{stateAdapter}"
+            bind:userInputEnabled="@{false}" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:orientation="vertical"
-                android:overScrollMode="never"
-                app:adapter="@{adapter}"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                bind:voiceItems="@{vm.voiceItems}" />
-
-        </ScrollView>
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_navigation_view"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@color/main"
+            app:elevation="0dp"
+            app:itemBackground="@color/main"
+            app:labelVisibilityMode="auto"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:menu="@menu/bottom_nav_menu" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

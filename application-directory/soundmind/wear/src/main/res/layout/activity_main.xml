@@ -26,36 +26,18 @@
             android:padding="@dimen/inner_frame_layout_padding"
             app:layout_boxedEdges="all">
 
-            <Button
-                android:id="@+id/record_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|center_horizontal"
-                android:background="@color/main"
-                android:gravity="center"
-                android:text="@string/record_text"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:visibility="@{vm.isRecording ? View.GONE : View.VISIBLE}" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="@{vm.statusText}"
-                tools:text="Disconnected..." />
+                android:text="@{vm.isRecording ? &quot;recording...&quot; : &quot;...&quot;}"
+                tools:text="recording..." />
 
-            <Button
-                android:id="@+id/stop_button"
+            <TextView
+                android:id="@+id/log_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|center_horizontal"
-                android:background="@color/main"
-                android:gravity="center"
-                android:text="@string/stop_text"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:visibility="@{vm.isRecording ? View.VISIBLE : View.GONE}" />
+                android:layout_gravity="bottom|center_horizontal" />
 
         </FrameLayout>
 
