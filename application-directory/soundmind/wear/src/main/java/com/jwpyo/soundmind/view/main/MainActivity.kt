@@ -55,24 +55,6 @@ class MainActivity :
     private var recordingJob: Job? = null
     //endregion
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        val keep = intent?.extras?.getBoolean("keep")
-        binding.logText.text = "intent -> $keep"
-
-        when (keep) {
-            true -> {
-                mainViewModel.isRecording.postValue(true)
-                startRecord()
-            }
-            false -> {
-                mainViewModel.isRecording.postValue(false)
-                stopRecord()
-            }
-            null -> Unit
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,10 +67,6 @@ class MainActivity :
 
         checkPermissions()
         setObservers()
-
-        heartSensors.forEach { sensor ->
-            sensorManager.registerListener(this, sensor, SENSOR_DELAY_FASTEST)
-        }
     }
 
     override fun onResume() {
@@ -99,7 +77,6 @@ class MainActivity :
     override fun onPause() {
         super.onPause()
         Wearable.getDataClient(this).removeListener(this)
-//        sensorManager.unregisterListener(this)
     }
 
     override fun onDestroy() {
@@ -121,7 +98,7 @@ class MainActivity :
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-        // TODO : Accuracy가 낮을 때 (0~2)이면 특수한 조치?
+        Log.d("hello", "accuracy = $accuracy")
     }
 
     override fun onSensorChanged(event: SensorEvent) {
@@ -152,17 +129,20 @@ class MainActivity :
 
     private fun setObservers() {
         appState.recordState.observe(this) {
-            binding.logText.text = "state -> $it"
             when (it) {
                 true -> {
                     if (mainViewModel.isRecording.value != true) {
                         mainViewModel.isRecording.postValue(true)
                         startRecord()
+                        heartSensors.forEach { sensor ->
+                            sensorManager.registerListener(this, sensor, SENSOR_DELAY_FASTEST)
+                        }
                     }
                 }
                 false -> {
                     mainViewModel.isRecording.postValue(false)
                     stopRecord()
+                    sensorManager.unregisterListener(this)
                 }
             }
         }
