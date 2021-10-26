@@ -33,9 +33,9 @@
             android:id="@+id/bottom_navigation_view"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="@color/main"
+            android:background="@color/sub"
             app:elevation="0dp"
-            app:itemBackground="@color/main"
+            app:itemBackground="@color/sub"
             app:labelVisibilityMode="auto"
             app:layout_constraintBottom_toBottomOf="parent"
             app:menu="@menu/bottom_nav_menu" />

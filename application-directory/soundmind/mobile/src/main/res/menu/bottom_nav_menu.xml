@@ -3,14 +3,17 @@
 
     <item
         android:id="@+id/nav_voice"
+        android:icon="@drawable/ic_baseline_keyboard_voice_24"
         android:title="@string/voice_page_title" />
 
     <item
         android:id="@+id/nav_ppg"
+        android:icon="@drawable/ic_baseline_storage_24"
         android:title="@string/ppg_page_title" />
 
     <item
         android:id="@+id/nav_setting"
+        android:icon="@drawable/ic_baseline_settings_24"
         android:title="@string/setting_page_title" />
 
 

@@ -9,7 +9,6 @@ import com.google.android.gms.wearable.DataEvent.TYPE_CHANGED
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.BaseActivity
 import com.jwpyo.soundmind.databinding.ActivityMainBinding
-import com.jwpyo.soundmind.extensions.showToast
 import com.jwpyo.soundmind.model.ppg.PPG
 import com.jwpyo.soundmind.utils.Constant.ACCURACY_KEY
 import com.jwpyo.soundmind.utils.Constant.AUDIO_KEY
@@ -20,9 +19,6 @@ import com.jwpyo.soundmind.utils.Constant.SENSOR_VALUE_KEY
 import com.jwpyo.soundmind.utils.Constant.START_TIME_KEY
 import com.jwpyo.soundmind.utils.Constant.TIME_STAMP_KEY
 import com.jwpyo.soundmind.view.adapter.MainStateAdapter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.threeten.bp.LocalDateTime
 
@@ -85,32 +81,32 @@ class MainActivity : BaseActivity(), OnDataChangedListener {
     }
 
     private fun onAudioChangedEvent(dataEvent: DataEvent) =
-            runCatching {
-                val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
-                val asset = dataMapItem.dataMap.getAsset(AUDIO_KEY)
-                val startLDT = LocalDateTime.parse(
-                    dataMapItem.dataMap.getString(START_TIME_KEY)
-                )
-                val endLDT = LocalDateTime.parse(
-                    dataMapItem.dataMap.getString(END_TIME_KEY)
-                )
-                mainViewModel.insertVoice(asset!!, startLDT, endLDT)
-            }.onFailure {
-                Log.e("hello", "error: $it")
-            }
+        runCatching {
+            val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
+            val asset = dataMapItem.dataMap.getAsset(AUDIO_KEY)
+            val startLDT = LocalDateTime.parse(
+                dataMapItem.dataMap.getString(START_TIME_KEY)
+            )
+            val endLDT = LocalDateTime.parse(
+                dataMapItem.dataMap.getString(END_TIME_KEY)
+            )
+            mainViewModel.insertVoice(asset!!, startLDT, endLDT)
+        }.onFailure {
+            Log.e("hello", "error: $it")
+        }
 
     private fun onPPGChangeEvent(dataEvent: DataEvent, sensorName: String) =
-            runCatching {
-                val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
-                val sensorValue = dataMapItem.dataMap.getFloatArray(SENSOR_VALUE_KEY)!!
-                val accuracy = dataMapItem.dataMap.getLongArray(ACCURACY_KEY)!!
-                val timestamp = dataMapItem.dataMap.getLongArray(TIME_STAMP_KEY)!!
+        runCatching {
+            val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
+            val sensorValue = dataMapItem.dataMap.getFloatArray(SENSOR_VALUE_KEY)!!
+            val accuracy = dataMapItem.dataMap.getLongArray(ACCURACY_KEY)!!
+            val timestamp = dataMapItem.dataMap.getLongArray(TIME_STAMP_KEY)!!
 
-                val ppgList = sensorValue.indices.map { i ->
-                    PPG(sensorName, sensorValue[i], accuracy[i].toInt(), timestamp[i])
-                }
-                mainViewModel.insertPPG(ppgList)
-            }.onFailure {
-                Log.e("hello", "error: $it")
+            val ppgList = sensorValue.indices.map { i ->
+                PPG(sensorName, sensorValue[i], accuracy[i].toInt(), timestamp[i])
             }
+            mainViewModel.insertPPG(ppgList)
+        }.onFailure {
+            Log.e("hello", "error: $it")
+        }
 }
