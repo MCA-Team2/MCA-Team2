@@ -18,4 +18,5 @@
     <string name="open_log_text">open log</string>
     <string name="export_text">export</string>
     <string name="send_to">SEND_TO</string>
+    <string name="content_description_default">image</string>
 </resources>
