@@ -10,6 +10,7 @@ import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.BaseActivity
 import com.jwpyo.soundmind.databinding.ActivityMainBinding
 import com.jwpyo.soundmind.model.ppg.PPG
+import com.jwpyo.soundmind.service.MainService
 import com.jwpyo.soundmind.utils.Constant.ACCURACY_KEY
 import com.jwpyo.soundmind.utils.Constant.AUDIO_KEY
 import com.jwpyo.soundmind.utils.Constant.AUDIO_PATH

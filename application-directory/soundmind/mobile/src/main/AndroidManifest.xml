@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.jwpyo.soundmind">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application
         android:name="com.jwpyo.soundmind.Application"
         android:allowBackup="false"
@@ -19,6 +21,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".service.MainService">
+
+            <!--            TODO> intent-filter 필요한가?? -->
+
+        </service>
 
     </application>
 

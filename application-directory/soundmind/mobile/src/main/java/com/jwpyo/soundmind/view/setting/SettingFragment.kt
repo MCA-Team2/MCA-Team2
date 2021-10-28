@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat.startForegroundService
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.MessageClient
@@ -12,6 +13,7 @@ import com.google.android.gms.wearable.Wearable
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.DatabindingFragment
 import com.jwpyo.soundmind.databinding.FragmentSettingBinding
+import com.jwpyo.soundmind.service.MainService
 import com.jwpyo.soundmind.utils.Constant
 import com.jwpyo.soundmind.view.main.MainViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -53,12 +55,14 @@ class SettingFragment : DatabindingFragment() {
         }
 
         binding.recordStartButton.setOnClickListener {
+            context?.startForegroundService(MainService.getIntentForStart(context))
             sendMessageToNodes { messageClient, node ->
                 messageClient.sendMessage(node, Constant.START_RECORD_PATH, ByteArray(0))
             }
         }
 
         binding.recordStopButton.setOnClickListener {
+            context?.stopService(MainService.getIntentForStart(context))
             sendMessageToNodes { messageClient, node ->
                 messageClient.sendMessage(node, Constant.STOP_RECORD_PATH, ByteArray(0))
             }
