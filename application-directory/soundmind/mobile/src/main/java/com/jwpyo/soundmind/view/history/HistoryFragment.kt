@@ -1,4 +1,4 @@
-package com.jwpyo.soundmind.view.ppg
+package com.jwpyo.soundmind.view.history
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,13 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.DatabindingFragment
-import com.jwpyo.soundmind.databinding.FragmentPpgBinding
-import com.jwpyo.soundmind.view.adapter.PPGAdapter
+import com.jwpyo.soundmind.databinding.FragmentHistoryBinding
 import com.jwpyo.soundmind.view.main.MainViewModel
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-class PPGFragment : DatabindingFragment() {
-    private lateinit var binding: FragmentPpgBinding
+class HistoryFragment : DatabindingFragment() {
+    private lateinit var binding: FragmentHistoryBinding
     private val viewModel by sharedViewModel<MainViewModel>()
 
     override fun onCreateView(
@@ -20,15 +19,24 @@ class PPGFragment : DatabindingFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return binding<FragmentPpgBinding>(
+        return binding<FragmentHistoryBinding>(
             inflater,
-            R.layout.fragment_ppg,
+            R.layout.fragment_history,
             container
         ).apply {
-            adapter = PPGAdapter(viewModel)
             vm = viewModel
             lifecycleOwner = viewLifecycleOwner
-            this@PPGFragment.binding = this
+            this@HistoryFragment.binding = this
         }.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setEventListeners()
+    }
+
+    private fun setEventListeners() {
+        // TODO> ...
     }
 }

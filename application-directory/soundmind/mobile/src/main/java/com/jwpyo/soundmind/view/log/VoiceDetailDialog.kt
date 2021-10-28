@@ -1,4 +1,4 @@
-package com.jwpyo.soundmind.view.ppg
+package com.jwpyo.soundmind.view.log
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,30 +6,32 @@ import android.view.View
 import android.view.ViewGroup
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.DatabindingDialog
-import com.jwpyo.soundmind.databinding.DialogPpgGraphBinding
+import com.jwpyo.soundmind.databinding.DialogVoiceDetailBinding
 import com.jwpyo.soundmind.extensions.applyWindowSize
 import com.jwpyo.soundmind.extensions.applyWindowTransparent
+import com.jwpyo.soundmind.view.adapter.VoiceAdapter
 import com.jwpyo.soundmind.view.main.MainViewModel
+import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
-class PPGGraphDialog(
-    private val sensorName: String,
-) : DatabindingDialog() {
-    private lateinit var binding: DialogPpgGraphBinding
-    val viewModel: MainViewModel by sharedViewModel()
+class VoiceDetailDialog : DatabindingDialog() {
+    private lateinit var binding: DialogVoiceDetailBinding
+    val viewModel: LogViewModel by sharedViewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        return binding<DialogPpgGraphBinding>(
+        return binding<DialogVoiceDetailBinding>(
             inflater,
-            R.layout.dialog_ppg_graph,
+            R.layout.dialog_voice_detail,
             container
         ).apply {
+            adapter = VoiceAdapter(viewModel, viewLifecycleOwner)
+            vm = viewModel
             lifecycleOwner = viewLifecycleOwner
-            this@PPGGraphDialog.binding = this
+            this@VoiceDetailDialog.binding = this
         }.root
     }
 
@@ -38,14 +40,5 @@ class PPGGraphDialog(
 
         applyWindowTransparent()
         applyWindowSize(0.9f, 0.5f)
-
-        binding.titleText.text = sensorName
-
-        viewModel.ppgList.observe(this) { ppgAllList ->
-            val ppgList = ppgAllList
-                .filter { it.sensorName == sensorName }
-                .sortedBy { it.timestamp }
-            binding.detailText.text = "#${ppgList.size} of data"
-        }
     }
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="uniform_text">
+        <item name="autoSizeMaxTextSize">100dp</item>
+        <item name="autoSizeMinTextSize">1dp</item>
+        <item name="autoSizeStepGranularity">0.5dp</item>
+        <item name="autoSizeTextType">uniform</item>
+    </style>
+
+</resources>

@@ -5,17 +5,18 @@ import androidx.lifecycle.LifecycleOwner
 import com.jwpyo.soundmind.base.BaseBindingViewHolder
 import com.jwpyo.soundmind.databinding.ItemVoiceBinding
 import com.jwpyo.soundmind.model.ui.VoiceItem
-import com.jwpyo.soundmind.view.main.MainViewModel
+import com.jwpyo.soundmind.view.log.LogViewModel
 
 class VoiceViewHolder(
     view: View,
-    private val viewModel: MainViewModel,
+    private val viewModel: LogViewModel,
+    private val lifecycleOwner: LifecycleOwner
 ) : BaseBindingViewHolder<ItemVoiceBinding>(view) {
     override fun bindData(data: Any) {
         if (data is VoiceItem) {
             binding.apply {
                 item = data
-                lifecycleOwner = view.context as LifecycleOwner
+                lifecycleOwner = this@VoiceViewHolder.lifecycleOwner
             }
 
             if (viewModel.isPlaying == data.voice.id)
