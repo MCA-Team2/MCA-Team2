@@ -17,4 +17,6 @@ object Constant {
     const val SENSOR_VALUE_KEY = "sensor-value"
     const val ACCURACY_KEY = "accuracy"
     const val TIME_STAMP_KEY = "time-stamp"
+
+    const val REQUEST_PERMISSION_CODE = 2
 }

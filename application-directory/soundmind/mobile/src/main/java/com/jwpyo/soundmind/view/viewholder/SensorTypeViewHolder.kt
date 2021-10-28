@@ -25,7 +25,7 @@ class SensorTypeViewHolder(
 
     private fun setEventListeners(sensorName: String) {
         binding.enterButton.setOnClickListener {
-            SensorDetailDialog(sensorName).show(view.context)
+            SensorDetailDialog(viewModel, sensorName).show(view.context)
         }
     }
 }

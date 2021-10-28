@@ -123,8 +123,10 @@ class MainActivity :
     }
 
     private fun checkPermissions() {
-        permissionManager.assertPermissionOrRequest(Manifest.permission.RECORD_AUDIO)
-        permissionManager.assertPermissionOrRequest(Manifest.permission.BODY_SENSORS)
+        permissionManager.assertPermissionOrRequest(
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.BODY_SENSORS
+        )
     }
 
     private fun setObservers() {
