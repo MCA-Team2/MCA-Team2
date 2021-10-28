@@ -7,11 +7,13 @@
     <string name="stop_text">stop</string>
     <string name="app_start_text">app start</string>
     <string name="more_text">more</string>
-    <string name="voice_page_title">voice</string>
-    <string name="ppg_page_title">ppg</string>
+    <string name="record_page_title">record</string>
+    <string name="history_page_title">history</string>
     <string name="setting_page_title">setting</string>
     <string name="enter_text">enter</string>
     <string name="notification_title">NOTI_TITLE</string>
     <string name="notification_message">NOTI_MSG</string>
     <string name="ticker_text">TICK</string>
+    <string name="voice_records_text">voice records</string>
+    <string name="open_log_text">open log</string>
 </resources>

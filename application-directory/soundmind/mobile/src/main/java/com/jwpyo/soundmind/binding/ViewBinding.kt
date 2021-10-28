@@ -29,11 +29,11 @@ fun bindNavigation(view: ViewPager2, navigationView: BottomNavigationView) {
     navigationView.setOnNavigationItemSelectedListener { item ->
         val checked = item.setChecked(true)
         when (checked.itemId) {
-            R.id.nav_voice -> {
+            R.id.nav_record -> {
                 view.setCurrentItem(0, false)
                 return@setOnNavigationItemSelectedListener true
             }
-            R.id.nav_ppg -> {
+            R.id.nav_history -> {
                 view.setCurrentItem(1, false)
                 return@setOnNavigationItemSelectedListener true
             }

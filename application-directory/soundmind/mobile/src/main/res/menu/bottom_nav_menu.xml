@@ -2,14 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/nav_voice"
+        android:id="@+id/nav_record"
         android:icon="@drawable/ic_baseline_keyboard_voice_24"
-        android:title="@string/voice_page_title" />
+        android:title="@string/record_page_title" />
 
     <item
-        android:id="@+id/nav_ppg"
+        android:id="@+id/nav_history"
         android:icon="@drawable/ic_baseline_storage_24"
-        android:title="@string/ppg_page_title" />
+        android:title="@string/history_page_title" />
 
     <item
         android:id="@+id/nav_setting"

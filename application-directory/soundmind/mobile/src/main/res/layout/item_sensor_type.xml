@@ -33,7 +33,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.5"
-            tools:text="Heart Rate PPG" />
+            tools:text="Sensor Name" />
 
         <Button
             android:id="@+id/enter_button"

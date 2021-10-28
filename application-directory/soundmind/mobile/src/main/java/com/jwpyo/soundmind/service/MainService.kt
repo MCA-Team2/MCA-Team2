@@ -8,7 +8,14 @@ import android.util.Log
 import com.google.android.gms.wearable.*
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.model.ppg.PPG
-import com.jwpyo.soundmind.utils.Constant
+import com.jwpyo.soundmind.utils.Constant.ACCURACY_KEY
+import com.jwpyo.soundmind.utils.Constant.AUDIO_KEY
+import com.jwpyo.soundmind.utils.Constant.AUDIO_PATH
+import com.jwpyo.soundmind.utils.Constant.END_TIME_KEY
+import com.jwpyo.soundmind.utils.Constant.PPG_PATH_PREFIX
+import com.jwpyo.soundmind.utils.Constant.SENSOR_VALUE_KEY
+import com.jwpyo.soundmind.utils.Constant.START_TIME_KEY
+import com.jwpyo.soundmind.utils.Constant.TIME_STAMP_KEY
 import com.jwpyo.soundmind.view.main.MainViewModel
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinComponent
@@ -69,14 +76,11 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
                 Log.d("hello", "hello $dataEvent")
 
                 when {
-                    path == Constant.AUDIO_PATH -> {
+                    path == AUDIO_PATH -> {
                         onAudioChangedEvent(dataEvent)
                     }
-                    path.substring(
-                        0,
-                        Constant.PPG_PATH_PREFIX.length
-                    ) == Constant.PPG_PATH_PREFIX -> {
-                        onPPGChangeEvent(dataEvent, path.substring(Constant.PPG_PATH_PREFIX.length))
+                    path.substring(0, PPG_PATH_PREFIX.length) == PPG_PATH_PREFIX -> {
+                        onPPGChangeEvent(dataEvent, path.substring(PPG_PATH_PREFIX.length))
                     }
                 }
             }
@@ -93,12 +97,12 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
     private fun onAudioChangedEvent(dataEvent: DataEvent) =
         runCatching {
             val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
-            val asset = dataMapItem.dataMap.getAsset(Constant.AUDIO_KEY)
+            val asset = dataMapItem.dataMap.getAsset(AUDIO_KEY)
             val startLDT = LocalDateTime.parse(
-                dataMapItem.dataMap.getString(Constant.START_TIME_KEY)
+                dataMapItem.dataMap.getString(START_TIME_KEY)
             )
             val endLDT = LocalDateTime.parse(
-                dataMapItem.dataMap.getString(Constant.END_TIME_KEY)
+                dataMapItem.dataMap.getString(END_TIME_KEY)
             )
             mainViewModel.insertVoice(asset!!, startLDT, endLDT)
         }.onFailure {
@@ -108,9 +112,9 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
     private fun onPPGChangeEvent(dataEvent: DataEvent, sensorName: String) =
         runCatching {
             val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
-            val sensorValue = dataMapItem.dataMap.getFloatArray(Constant.SENSOR_VALUE_KEY)!!
-            val accuracy = dataMapItem.dataMap.getLongArray(Constant.ACCURACY_KEY)!!
-            val timestamp = dataMapItem.dataMap.getLongArray(Constant.TIME_STAMP_KEY)!!
+            val sensorValue = dataMapItem.dataMap.getFloatArray(SENSOR_VALUE_KEY)!!
+            val accuracy = dataMapItem.dataMap.getLongArray(ACCURACY_KEY)!!
+            val timestamp = dataMapItem.dataMap.getLongArray(TIME_STAMP_KEY)!!
 
             val ppgList = sensorValue.indices.map { i ->
                 PPG(sensorName, sensorValue[i], accuracy[i].toInt(), timestamp[i])

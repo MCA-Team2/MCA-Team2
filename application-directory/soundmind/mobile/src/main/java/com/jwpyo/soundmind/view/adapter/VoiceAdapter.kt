@@ -2,9 +2,11 @@ package com.jwpyo.soundmind.view.adapter
 
 import android.content.res.Resources
 import android.view.View
+import androidx.lifecycle.LifecycleOwner
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.model.ui.VoiceItem
 import com.jwpyo.soundmind.utils.SoundPlayer
+import com.jwpyo.soundmind.view.log.LogViewModel
 import com.jwpyo.soundmind.view.main.MainViewModel
 import com.jwpyo.soundmind.view.viewholder.VoiceViewHolder
 import com.skydoves.baserecyclerviewadapter.BaseAdapter
@@ -12,8 +14,8 @@ import com.skydoves.baserecyclerviewadapter.BaseViewHolder
 import com.skydoves.baserecyclerviewadapter.SectionRow
 
 class VoiceAdapter(
-    private val viewModel: MainViewModel,
-    private val soundPlayer: SoundPlayer,
+    private val viewModel: LogViewModel,
+    private val lifecycleOwner: LifecycleOwner
 ) : BaseAdapter() {
     init {
         addSection(arrayListOf<Any>())
@@ -31,7 +33,7 @@ class VoiceAdapter(
 
     override fun viewHolder(layout: Int, view: View): BaseViewHolder {
         when (layout) {
-            R.layout.item_voice -> return VoiceViewHolder(view, viewModel)
+            R.layout.item_voice -> return VoiceViewHolder(view, viewModel, lifecycleOwner)
             else -> throw Resources.NotFoundException("not founded layout")
         }
 

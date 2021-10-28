@@ -27,11 +27,11 @@ class MainActivity : BaseActivity() {
     }
 
     private fun setEventListeners() {
-        findViewById<View>(R.id.nav_voice).setOnClickListener {
-            binding.bottomNavigationView.selectedItemId = R.id.nav_voice
+        findViewById<View>(R.id.nav_record).setOnClickListener {
+            binding.bottomNavigationView.selectedItemId = R.id.nav_record
         }
-        findViewById<View>(R.id.nav_ppg).setOnClickListener {
-            binding.bottomNavigationView.selectedItemId = R.id.nav_ppg
+        findViewById<View>(R.id.nav_history).setOnClickListener {
+            binding.bottomNavigationView.selectedItemId = R.id.nav_history
         }
         findViewById<View>(R.id.nav_setting).setOnClickListener {
             binding.bottomNavigationView.selectedItemId = R.id.nav_setting

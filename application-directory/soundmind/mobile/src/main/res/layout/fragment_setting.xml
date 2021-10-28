@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -17,36 +16,15 @@
         android:background="@color/background">
 
         <Button
-            android:id="@+id/app_start_button"
+            android:id="@+id/open_log_button"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:text="@string/app_start_text"
+            android:text="@string/open_log_text"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="4"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.5" />
-
-        <Button
-            android:id="@+id/record_start_button"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:text="@string/start_text"
-            app:layout_constraintDimensionRatio="4"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/app_start_button"
-            app:layout_constraintWidth_percent="0.5" />
-
-        <Button
-            android:id="@+id/record_stop_button"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:text="@string/stop_text"
-            app:layout_constraintDimensionRatio="4"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/record_start_button"
             app:layout_constraintWidth_percent="0.5" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
