@@ -5,10 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import com.google.android.gms.wearable.*
 import com.jwpyo.soundmind.R
+import com.jwpyo.soundmind.model.ppg.PPG
+import com.jwpyo.soundmind.utils.Constant
+import com.jwpyo.soundmind.view.main.MainViewModel
 import kotlinx.coroutines.*
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.threeten.bp.LocalDateTime
 
-class MainService : Service() {
+class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
+    val mainViewModel: MainViewModel = get()
     var job: Job? = null
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -53,19 +61,64 @@ class MainService : Service() {
         super.onDestroy()
     }
 
-    private fun startRecording() {
-        job = CoroutineScope(Dispatchers.IO). launch {
-            while (true) {
-                Log.d("hello", "hello-service i'm alive")
-                delay(1000L)
+    override fun onDataChanged(dataEvents: DataEventBuffer) {
+        dataEvents
+            .filter { it.type == DataEvent.TYPE_CHANGED }
+            .forEach { dataEvent ->
+                val path = dataEvent.dataItem.uri.path ?: return@forEach
+                Log.d("hello", "hello $dataEvent")
+
+                when {
+                    path == Constant.AUDIO_PATH -> {
+                        onAudioChangedEvent(dataEvent)
+                    }
+                    path.substring(
+                        0,
+                        Constant.PPG_PATH_PREFIX.length
+                    ) == Constant.PPG_PATH_PREFIX -> {
+                        onPPGChangeEvent(dataEvent, path.substring(Constant.PPG_PATH_PREFIX.length))
+                    }
+                }
             }
-        }
+    }
+
+    private fun startRecording() {
+        Wearable.getDataClient(this).addListener(this)
     }
 
     private fun stopRecording() {
-        job?.cancel()
-        Log.d("hello", "hello-service i'm removed")
+        Wearable.getDataClient(this).removeListener(this)
     }
+
+    private fun onAudioChangedEvent(dataEvent: DataEvent) =
+        runCatching {
+            val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
+            val asset = dataMapItem.dataMap.getAsset(Constant.AUDIO_KEY)
+            val startLDT = LocalDateTime.parse(
+                dataMapItem.dataMap.getString(Constant.START_TIME_KEY)
+            )
+            val endLDT = LocalDateTime.parse(
+                dataMapItem.dataMap.getString(Constant.END_TIME_KEY)
+            )
+            mainViewModel.insertVoice(asset!!, startLDT, endLDT)
+        }.onFailure {
+            Log.e("hello", "error: $it")
+        }
+
+    private fun onPPGChangeEvent(dataEvent: DataEvent, sensorName: String) =
+        runCatching {
+            val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
+            val sensorValue = dataMapItem.dataMap.getFloatArray(Constant.SENSOR_VALUE_KEY)!!
+            val accuracy = dataMapItem.dataMap.getLongArray(Constant.ACCURACY_KEY)!!
+            val timestamp = dataMapItem.dataMap.getLongArray(Constant.TIME_STAMP_KEY)!!
+
+            val ppgList = sensorValue.indices.map { i ->
+                PPG(sensorName, sensorValue[i], accuracy[i].toInt(), timestamp[i])
+            }
+            mainViewModel.insertPPG(ppgList)
+        }.onFailure {
+            Log.e("hello", "error: $it")
+        }
 
     companion object {
         const val CHANNEL_ID = "MAIN_SERVICE_ID"
