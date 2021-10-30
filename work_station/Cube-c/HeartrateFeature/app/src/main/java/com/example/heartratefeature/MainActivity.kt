@@ -37,9 +37,8 @@ class MainActivity : Activity(), SensorEventListener {
     // PPG related
     private var timestampStart: Long = 0
     private val ppgData: MutableList<Double> = mutableListOf()
-    private val butterworth: Butterworth = Butterworth()
 
-    private val ANALYSIS_INTERVAL: Long = 30 // in seconds
+    private val ANALYSIS_INTERVAL: Long = 300 // in seconds
     private val CENTER_FREQUENCY: Double = 2.1 // Hz
     private val WIDTH_FREQUENCY : Double = 2.8 // Hz
     private val BPM_MIN : Double = 40.0
@@ -79,9 +78,6 @@ class MainActivity : Activity(), SensorEventListener {
         }
         startForegroundService(intent)
 
-        // Initialize band-pass filter, [0.75 - 2.5]Hz
-        butterworth.bandPass(2, SAMPLING_FREQUENCY, CENTER_FREQUENCY, WIDTH_FREQUENCY)
-
         // listening PPG
         mPPG?.also { heart ->
             sensorManager.registerListener(this, heart, SensorManager.SENSOR_DELAY_FASTEST)
@@ -98,189 +94,182 @@ class MainActivity : Activity(), SensorEventListener {
             when {
                 ppgData.size == 0 -> {
                     timestampStart = timestamp
-                    // TODO : Initialize properly...
-                    for (i in 1..50) {
-                        butterworth.filter(value.toDouble())
-                    }
                 }
                 timestamp - timestampStart < ANALYSIS_INTERVAL * 1000000000 -> { }
                 else -> {
-                    analyzePPG()
+                    analyzeRR(analyzePPG(ppgData))
                     ppgData.clear()
                     timestampStart = timestamp
                 }
             }
-            val filteredValue = butterworth.filter(value.toDouble())
-            ppgData.add(filteredValue)
+            ppgData.add(value.toDouble())
         }
     }
 
-    private fun analyzePPG() {
+    private fun analyzePPG(ppgRaw : MutableList<Double>): MutableList<Double> {
+        val ppgFiltered = mutableListOf<Double>()
+        ppgFiltered.addAll(ppgRaw)
+
+        // Forward filtering
+        var offset = ppgFiltered[0]
+        ppgFiltered.replaceAll{ value -> value - offset }
+
+        val butterworth = Butterworth()
+        butterworth.bandPass(2, SAMPLING_FREQUENCY, CENTER_FREQUENCY, WIDTH_FREQUENCY)
+        ppgFiltered.replaceAll { value -> butterworth.filter(value) }
+
         // Backward filtering (to remove phase shift)
-        ppgData.reverse()
+        ppgFiltered.reverse()
+        offset = ppgFiltered[0]
+        ppgFiltered.replaceAll{ value -> value - offset}
+
         val butterworth2 = Butterworth()
         butterworth2.bandPass(2, SAMPLING_FREQUENCY, CENTER_FREQUENCY, WIDTH_FREQUENCY)
-
-        // TODO : Initialize properly...
-        for (i in 1..50) {
-            butterworth2.filter(ppgData[0])
-        }
-
-        ppgData.replaceAll { value -> butterworth2.filter(value) }
-        ppgData.reverse()
-
-        // Simple peak candidate : local minima
-        /*
-        val ppgPeakRange = 3
-        val ppgPeakCandidate = mutableListOf<Int>()
-        for (index in ppgPeakRange until ppgData.size - ppgPeakRange) {
-            var isMinimum = true
-            for (searchIndex in index - ppgPeakRange until index + ppgPeakRange + 1) {
-                if (ppgData[searchIndex] < ppgData[index]) {
-                    isMinimum = false
-                    break
-                }
-            }
-            if (isMinimum) {
-                ppgPeakCandidate.add(index)
-            }
-        }
-        */
+        ppgFiltered.replaceAll { value -> butterworth2.filter(value) }
+        ppgFiltered.reverse()
 
         // Baseline for moving average algorithm to work
-        val ppgDataCopy = mutableListOf<Double>()
-        ppgDataCopy.addAll(ppgData)
-        ppgDataCopy.sort()
-        val bias = ppgDataCopy[(ppgData.size * 0.9).toInt()]
+        val ppgCopy = mutableListOf<Double>()
+        ppgCopy.addAll(ppgFiltered)
+        ppgCopy.sort()
+        val bias = ppgCopy[(ppgFiltered.size * 0.9).toInt()]
         if (bias > 0) {
-            ppgData.replaceAll { value -> value - bias }
+            ppgFiltered.replaceAll { value -> value - bias }
         }
 
         // Rolling mean calculation
         val slidingWindowHalfSize = (0.375 * SAMPLING_FREQUENCY).toInt()
-        val ppgDataRollingMean = mutableListOf<Double>()
-        var ppgDataRollingMeanTotal: Double = 0.0
-        for (index in slidingWindowHalfSize until ppgData.size - slidingWindowHalfSize) {
+        val ppgRollingMean = mutableListOf<Double>()
+        var ppgRollingMeanTotal: Double = 0.0
+        for (index in slidingWindowHalfSize until ppgFiltered.size - slidingWindowHalfSize) {
             var sum: Double = 0.0
             for (addIndex in index - slidingWindowHalfSize until index + slidingWindowHalfSize + 1) {
-                sum += ppgData[addIndex]
+                sum += ppgFiltered[addIndex]
             }
             sum /= (slidingWindowHalfSize * 2 + 1)
-            if (index == slidingWindowHalfSize || index == ppgData.size - slidingWindowHalfSize - 1) {
+            if (index == slidingWindowHalfSize || index == ppgFiltered.size - slidingWindowHalfSize - 1) {
                 for (k in 0 until slidingWindowHalfSize) {
-                    ppgDataRollingMean.add(sum)
+                    ppgRollingMean.add(sum)
                 }
             }
-            ppgDataRollingMean.add(sum)
+            ppgRollingMean.add(sum)
         }
-        ppgDataRollingMean.forEach { value -> ppgDataRollingMeanTotal += value }
-        ppgDataRollingMeanTotal /= ppgDataRollingMean.size
-
-        // Draw graph
-        val entries = mutableListOf<Entry>()
-        ppgData.forEachIndexed { index, value ->
-            if (index % 10 == 0 && index < SAMPLING_FREQUENCY * ANALYSIS_INTERVAL / 3) {
-                entries.add(Entry(index.toFloat(), value.toFloat()))
-            }
-        }
-        val lineDataSet = LineDataSet(entries, "HR")
-        lineDataSet.color = Color.RED
-        lineDataSet.setDrawCircles(false)
-
-        val dataSets = ArrayList<ILineDataSet>()
-        dataSets.add(lineDataSet)
+        ppgRollingMean.forEach { value -> ppgRollingMeanTotal += value }
+        ppgRollingMeanTotal /= ppgRollingMean.size
 
         // Detect peaks
         val thresholdLevel = mutableListOf<Double>(
             0.05, 0.1, 0.15, 0.2, 0.25,
             0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.5, 2.0, 3.0
         )
-        val optimalPPGDataPeak = mutableListOf<Int>()
-        val optimalPPGDataRR = mutableListOf<Double>()
+        val optimalPPGPeak = mutableListOf<Int>()
+        var optimalPPGRR = mutableListOf<Double>()
         var optimalRRStd = Double.MAX_VALUE
-        var optimalBPM = 0.0
 
         for (threshold in thresholdLevel) {
-            val ppgDataPeak = mutableListOf<Int>()
-            val ppgDataRR = mutableListOf<Double>()
+            val ppgPeak = mutableListOf<Int>()
+            val ppgRR = mutableListOf<Double>()
             var ignore: Boolean = true
             var findPeak: Boolean = false
             var indexPeak: Int = 0
 
-            for (index in 0 until ppgData.size) {
+            for (index in 0 until ppgFiltered.size) {
                 val currentThreshold =
-                    ppgDataRollingMean[index] + ppgDataRollingMeanTotal * threshold
-                if (ppgData[index] < currentThreshold) {
+                    ppgRollingMean[index] + ppgRollingMeanTotal * threshold
+                if (ppgFiltered[index] < currentThreshold) {
                     if (!ignore) {
-                        if (!findPeak || (ppgData[indexPeak] > ppgData[index])) {
+                        if (!findPeak || (ppgFiltered[indexPeak] > ppgFiltered[index])) {
                             indexPeak = index
                         }
                         findPeak = true
                     }
                 } else if (findPeak) {
-                    ppgDataPeak.add(indexPeak)
+                    ppgPeak.add(indexPeak)
                     findPeak = false
                 } else {
                     ignore = false
                 }
             }
 
-            val bpm: Double = ppgDataPeak.size * 60.0 / ANALYSIS_INTERVAL
+            val bpm: Double = ppgPeak.size * 60.0 / ANALYSIS_INTERVAL
             var rrSquared: Double = 0.0
             var rrSum: Double = 0.0
-            for (index in 0 until ppgDataPeak.size - 1) {
-                val rr = (ppgDataPeak[index + 1] - ppgDataPeak[index]) / SAMPLING_FREQUENCY
-                ppgDataRR.add(rr)
+            for (index in 0 until ppgPeak.size - 1) {
+                val rr = (ppgPeak[index + 1] - ppgPeak[index]) / SAMPLING_FREQUENCY
+                ppgRR.add(rr)
                 rrSum += rr
                 rrSquared += rr * rr
             }
-            rrSquared /= (ppgDataRR.size - 1)
-            rrSum /= (ppgDataRR.size - 1)
+            rrSquared /= (ppgRR.size - 1)
+            rrSum /= (ppgRR.size - 1)
             val rrStd = kotlin.math.sqrt(rrSquared - rrSum * rrSum)
 
             if (rrStd < optimalRRStd && bpm <= BPM_MAX && BPM_MIN <= bpm) {
                 optimalRRStd = rrStd
-                optimalBPM = bpm
-                optimalPPGDataPeak.clear()
-                optimalPPGDataPeak.addAll(ppgDataPeak)
+                optimalPPGPeak.clear()
+                optimalPPGPeak.addAll(ppgPeak)
             }
         }
 
         if (optimalRRStd == Double.MAX_VALUE) {
             // Failed to find optimal solution
-            return
+            return mutableListOf<Double>()
         }
 
         // TODO : Interpolate peaks for higher precision
 
         // Calculate RR interval
-        for (index in 0 until optimalPPGDataPeak.size - 1) {
-            val rr = (optimalPPGDataPeak[index + 1] - optimalPPGDataPeak[index]) / SAMPLING_FREQUENCY
-            optimalPPGDataRR.add(rr)
+        for (index in 0 until optimalPPGPeak.size - 1) {
+            val rr = (optimalPPGPeak[index + 1] - optimalPPGPeak[index]) / SAMPLING_FREQUENCY
+            optimalPPGRR.add(rr)
         }
 
-        // Define RR range and reject outliers
+        // Define possible RR range and reject outliers
         var meanRR = 0.0
         var rangeRR = 0.0
-        val optimalPPGDataRR2 = mutableListOf<Double>()
-        optimalPPGDataRR.forEach { value -> meanRR += value }
-        meanRR /= optimalPPGDataRR.size
+        optimalPPGRR.forEach { value -> meanRR += value }
+        meanRR /= optimalPPGRR.size
         rangeRR = max(0.3 * meanRR, 0.3)
-        optimalPPGDataRR2.addAll(optimalPPGDataRR.filter{ value -> (meanRR - rangeRR < value && meanRR + rangeRR > value) })
-        optimalPPGDataRR2.forEach {
-            Log.d(TAG, it.toString())
-        }
+        optimalPPGRR = optimalPPGRR.filter{
+            value -> (meanRR - rangeRR < value && meanRR + rangeRR > value)
+        } as MutableList<Double>
 
+        // Reject outlier once more, use IQR
+        val optimalPPGDataRRCopy = mutableListOf<Double>()
+        optimalPPGDataRRCopy.addAll(optimalPPGRR)
+        optimalPPGDataRRCopy.sort()
+        val q1RR = optimalPPGDataRRCopy[(optimalPPGDataRRCopy.size * 0.25).toInt()]
+        val q3RR = optimalPPGDataRRCopy[(optimalPPGDataRRCopy.size * 0.75).toInt()]
+        optimalPPGRR = optimalPPGRR.filter {
+            value ->  (value > q1RR * 1.5 - q3RR * 0.5) && (value < q3RR * 1.5 - q1RR * 0.5)
+        } as MutableList<Double>
+
+        optimalPPGRR.forEach{ value -> Log.d(TAG, value.toString()) }
+
+        /*
         // Visualize Result
+        val dataSets = ArrayList<ILineDataSet>()
+
+        // Draw PPG and Peaks
+        val entries = mutableListOf<Entry>()
+        ppgFiltered.forEachIndexed { index, value ->
+            if (index % 10 == 0 && index < ppgFiltered.size / 3) {
+                entries.add(Entry(index.toFloat(), value.toFloat()))
+            }
+        }
+        val lineDataSet = LineDataSet(entries, "HR")
+        lineDataSet.color = Color.RED
+        lineDataSet.setDrawCircles(false)
+        dataSets.add(lineDataSet)
+
         val peakEntries = mutableListOf<Entry>()
-        optimalPPGDataPeak.forEach { value ->
-            if (value < SAMPLING_FREQUENCY * ANALYSIS_INTERVAL / 3)
-                peakEntries.add(Entry(value.toFloat(), ppgData[value].toFloat()))
+        optimalPPGPeak.forEach { value ->
+            if (value < ppgFiltered.size / 3)
+                peakEntries.add(Entry(value.toFloat(), ppgFiltered[value].toFloat()))
         }
         val ppgPeakDataSet = LineDataSet(peakEntries, "HR")
         ppgPeakDataSet.color = Color.TRANSPARENT
         ppgPeakDataSet.circleSize = 2F
-
         dataSets.add(ppgPeakDataSet)
 
         val data = LineData(dataSets)
@@ -297,7 +286,89 @@ class MainActivity : Activity(), SensorEventListener {
         chartView?.xAxis?.setDrawGridLines(false)
         chartView?.xAxis?.setDrawAxisLine(false)
         chartView?.legend?.isEnabled = false
-        textView?.text = "BPM " + optimalBPM.toInt().toString()
+         */
+        return optimalPPGRR
+    }
+
+    private fun analyzeRR(rrY : MutableList<Double>) {
+        if (rrY.isEmpty()) return
+
+        val resampleFactor = 4
+        val dataLength = (rrY.size - 1) * resampleFactor
+        val rrX = mutableListOf<Double>()
+        var rrXAccumulator = 0.0
+        rrY.forEach { value ->
+            rrXAccumulator += value
+            rrX.add(rrXAccumulator)
+        }
+        val rrXNew = mutableListOf<Double>()
+        val rrXInterval = (rrX.last() - rrX.first()) / (dataLength - 1)
+        for (i in 0 until dataLength) {
+            rrXNew.add(rrXInterval * i + rrX.first())
+        }
+
+        // Resampling with Cubic Hermite spline
+        val rrTangent = mutableListOf<Double>()
+        rrTangent.add((rrY[1] - rrY[0]) / (rrX[1] - rrX[0]))
+        for (i in 1 until rrY.size - 1) {
+            rrTangent.add((rrY[i+1] - rrY[i-1]) / (rrX[i+1] - rrX[i-1]))
+        }
+        rrTangent.add((rrY[rrY.size - 1] - rrY[rrY.size - 2]) / (rrX[rrY.size - 1] / rrX[rrY.size - 2]))
+        val rrYNew = mutableListOf<Double>()
+        var index = 1
+        rrXNew.forEach { value ->
+            while (rrX[index] < value && index < rrX.size - 1) {
+                index++
+            }
+            val t = (value - rrX[index - 1]) / (rrX[index] - rrX[index - 1])
+            val t2 = t*t
+            val t3 = t2*t
+            rrYNew.add((2*t3-3*t2+1) * rrY[index - 1] + (-2*t3+3*t2) * rrY[index]
+                    + (t3-2*t2+t) * rrTangent[index-1] + (t3-t2) * rrTangent[index])
+        }
+
+        // TODO : Implement Welch's method
+
+        // This time just DFT
+
+        // RR interval Visualization
+        val dataSets = ArrayList<ILineDataSet>()
+
+        val rrEntries = mutableListOf<Entry>()
+        for (i in 0 until rrXNew.size) {
+            rrEntries.add(Entry(rrXNew[i].toFloat(), rrYNew[i].toFloat()))
+        }
+        val rrDataSet = LineDataSet(rrEntries, "RR Interval")
+        rrDataSet.valueTextSize = 0.0F
+        rrDataSet.setDrawCircles(false)
+        dataSets.add(rrDataSet)
+
+        /*
+        val rrLineEntries = mutableListOf<Entry>()
+        for (i in 0 until rrX.size) {
+            rrLineEntries.add(Entry(rrX[i].toFloat(), rrY[i].toFloat()))
+        }
+        val rrLineDataSet = LineDataSet(rrLineEntries, "RR Interval")
+        rrLineDataSet.valueTextSize = 0.0F
+        rrLineDataSet.color = Color.RED
+        rrLineDataSet.setDrawCircles(false)
+        dataSets.add(rrLineDataSet)
+        */
+
+        val data = LineData(dataSets)
+        chartView?.description = null
+        chartView?.setViewPortOffsets(0.0F, 0.0F, 0.0F, 0.0F)
+        chartView?.data = data
+        chartView?.notifyDataSetChanged()
+        chartView?.invalidate()
+        chartView?.setTouchEnabled(false)
+        chartView?.axisLeft?.setDrawGridLines(false)
+        chartView?.axisLeft?.setDrawAxisLine(false)
+        chartView?.axisRight?.setDrawGridLines(false)
+        chartView?.axisRight?.setDrawAxisLine(false)
+        chartView?.xAxis?.setDrawGridLines(false)
+        chartView?.xAxis?.setDrawAxisLine(false)
+        chartView?.legend?.isEnabled = false
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {}
