@@ -154,6 +154,24 @@
                         android:layout_weight = "1"/>
                 </LinearLayout>
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toBottomOf="@id/guideline_index_t"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/guideline_graph_b">
+
+                    <ImageButton
+                        android:id="@+id/playButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/common_full_open_on_phone"/>
+
+
+                </RelativeLayout>
+                
                 <HorizontalScrollView
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
