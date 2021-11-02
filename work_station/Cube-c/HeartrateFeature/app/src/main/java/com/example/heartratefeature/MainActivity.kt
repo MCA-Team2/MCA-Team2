@@ -41,7 +41,7 @@ class MainActivity : Activity(), SensorEventListener {
     private var timestampStart: Long = 0
     private val ppgData: MutableList<Double> = mutableListOf()
 
-    private val ANALYSIS_INTERVAL: Double = 150.0 // in second6
+    private val ANALYSIS_INTERVAL: Double = 300.0 // in second6
     private val CENTER_FREQUENCY: Double = 2.1 // Hz
     private val WIDTH_FREQUENCY : Double = 2.8 // Hz
     private val BPM_MIN : Double = 40.0
@@ -360,6 +360,8 @@ class MainActivity : Activity(), SensorEventListener {
             lf += max(min(min((i + 0.5) * binFrequency - 0.04, 0.15 - (i - 0.5) * binFrequency), binFrequency), 0.0) * rrMagnitude[i]
             hf += max(min(min((i + 0.5) * binFrequency - 0.15, 0.40 - (i - 0.5) * binFrequency), binFrequency), 0.0) * rrMagnitude[i]
         }
+        Log.d(TAG_RESULT, "LF : $lf")
+        Log.d(TAG_RESULT, "HF : $hf")
         textView?.text = "%.2f".format(lf / hf)
 
         // RR interval Visualization
