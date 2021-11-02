@@ -22,8 +22,10 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.data.ScatterDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
+import org.jtransforms.fft.DoubleFFT_1D
 import uk.me.berndporr.iirj.Butterworth
 import java.lang.Double.max
+import java.lang.Double.min
 
 class MainActivity : Activity(), SensorEventListener {
     private lateinit var binding: ActivityMainBinding
@@ -32,22 +34,18 @@ class MainActivity : Activity(), SensorEventListener {
     private var textView: TextView? = null
 
     private val TYPE_PPG_RAW = 65572
-    private val TAG = "MCA"
+    private val TAG_RESULT = "MCA_RESULT"
+    private val TAG_RAW = "MCA_RAW"
 
     // PPG related
     private var timestampStart: Long = 0
     private val ppgData: MutableList<Double> = mutableListOf()
 
-    private val ANALYSIS_INTERVAL: Long = 300 // in seconds
+    private val ANALYSIS_INTERVAL: Double = 150.0 // in second6
     private val CENTER_FREQUENCY: Double = 2.1 // Hz
     private val WIDTH_FREQUENCY : Double = 2.8 // Hz
     private val BPM_MIN : Double = 40.0
     private val BPM_MAX : Double = 180.0
-
-    // Temporary sampling freq
-    // based on Mobvoi TicWatch Pro
-    // TODO: need to be calculated dynamically
-    private val SAMPLING_FREQUENCY: Double = 208.4
 
     // Chart (Debug)
     private var chartView: LineChart? = null
@@ -102,11 +100,13 @@ class MainActivity : Activity(), SensorEventListener {
                     timestampStart = timestamp
                 }
             }
+            // Log.d(TAG_RAW, "$timestamp $value")
             ppgData.add(value.toDouble())
         }
     }
 
     private fun analyzePPG(ppgRaw : MutableList<Double>): MutableList<Double> {
+        val samplingFrequency: Double = ppgRaw.size / ANALYSIS_INTERVAL
         val ppgFiltered = mutableListOf<Double>()
         ppgFiltered.addAll(ppgRaw)
 
@@ -115,7 +115,7 @@ class MainActivity : Activity(), SensorEventListener {
         ppgFiltered.replaceAll{ value -> value - offset }
 
         val butterworth = Butterworth()
-        butterworth.bandPass(2, SAMPLING_FREQUENCY, CENTER_FREQUENCY, WIDTH_FREQUENCY)
+        butterworth.bandPass(2, samplingFrequency, CENTER_FREQUENCY, WIDTH_FREQUENCY)
         ppgFiltered.replaceAll { value -> butterworth.filter(value) }
 
         // Backward filtering (to remove phase shift)
@@ -124,7 +124,7 @@ class MainActivity : Activity(), SensorEventListener {
         ppgFiltered.replaceAll{ value -> value - offset}
 
         val butterworth2 = Butterworth()
-        butterworth2.bandPass(2, SAMPLING_FREQUENCY, CENTER_FREQUENCY, WIDTH_FREQUENCY)
+        butterworth2.bandPass(2, samplingFrequency, CENTER_FREQUENCY, WIDTH_FREQUENCY)
         ppgFiltered.replaceAll { value -> butterworth2.filter(value) }
         ppgFiltered.reverse()
 
@@ -132,13 +132,13 @@ class MainActivity : Activity(), SensorEventListener {
         val ppgCopy = mutableListOf<Double>()
         ppgCopy.addAll(ppgFiltered)
         ppgCopy.sort()
-        val bias = ppgCopy[(ppgFiltered.size * 0.9).toInt()]
-        if (bias > 0) {
+        val bias = ppgCopy[(ppgFiltered.size * 0.1).toInt()]
+        if (bias < 0) {
             ppgFiltered.replaceAll { value -> value - bias }
         }
 
         // Rolling mean calculation
-        val slidingWindowHalfSize = (0.375 * SAMPLING_FREQUENCY).toInt()
+        val slidingWindowHalfSize = (0.375 * samplingFrequency).toInt()
         val ppgRollingMean = mutableListOf<Double>()
         var ppgRollingMeanTotal: Double = 0.0
         for (index in slidingWindowHalfSize until ppgFiltered.size - slidingWindowHalfSize) {
@@ -176,9 +176,9 @@ class MainActivity : Activity(), SensorEventListener {
             for (index in 0 until ppgFiltered.size) {
                 val currentThreshold =
                     ppgRollingMean[index] + ppgRollingMeanTotal * threshold
-                if (ppgFiltered[index] < currentThreshold) {
+                if (ppgFiltered[index] > currentThreshold) {
                     if (!ignore) {
-                        if (!findPeak || (ppgFiltered[indexPeak] > ppgFiltered[index])) {
+                        if (!findPeak || (ppgFiltered[indexPeak] < ppgFiltered[index])) {
                             indexPeak = index
                         }
                         findPeak = true
@@ -192,10 +192,10 @@ class MainActivity : Activity(), SensorEventListener {
             }
 
             val bpm: Double = ppgPeak.size * 60.0 / ANALYSIS_INTERVAL
-            var rrSquared: Double = 0.0
-            var rrSum: Double = 0.0
+            var rrSquared = 0.0
+            var rrSum = 0.0
             for (index in 0 until ppgPeak.size - 1) {
-                val rr = (ppgPeak[index + 1] - ppgPeak[index]) / SAMPLING_FREQUENCY
+                val rr = (ppgPeak[index + 1] - ppgPeak[index]) / samplingFrequency
                 ppgRR.add(rr)
                 rrSum += rr
                 rrSquared += rr * rr
@@ -220,37 +220,46 @@ class MainActivity : Activity(), SensorEventListener {
 
         // Calculate RR interval
         for (index in 0 until optimalPPGPeak.size - 1) {
-            val rr = (optimalPPGPeak[index + 1] - optimalPPGPeak[index]) / SAMPLING_FREQUENCY
+            val rr = (optimalPPGPeak[index + 1] - optimalPPGPeak[index]) / samplingFrequency
             optimalPPGRR.add(rr)
         }
 
-        // Define possible RR range and reject outliers
+        // Define RR range and reject peak anomaly
         var meanRR = 0.0
         var rangeRR = 0.0
+        var optimalPPGRRCorrection = mutableListOf<Double>()
         optimalPPGRR.forEach { value -> meanRR += value }
         meanRR /= optimalPPGRR.size
         rangeRR = max(0.3 * meanRR, 0.3)
-        optimalPPGRR = optimalPPGRR.filter{
-            value -> (meanRR - rangeRR < value && meanRR + rangeRR > value)
+        for (i in 0 until optimalPPGRR.size - 1) {
+            val val1 = optimalPPGRR[i]
+            val val2 = optimalPPGRR[i + 1]
+            if (meanRR - rangeRR < val1 && meanRR + rangeRR > val1 &&
+                meanRR - rangeRR < val2 && meanRR + rangeRR > val2) {
+                optimalPPGRRCorrection.add(val1)
+            }
+        }
+        if (meanRR - rangeRR < optimalPPGRR.last() && meanRR + rangeRR > optimalPPGRR.last()) {
+            optimalPPGRRCorrection.add(optimalPPGRR.last())
+        }
+
+        // Reject strange RR interval, use IQR
+        val optimalPPGRRCopy = mutableListOf<Double>()
+        optimalPPGRRCopy.addAll(optimalPPGRRCorrection)
+        optimalPPGRRCopy.sort()
+        val q1RR = optimalPPGRRCopy[(optimalPPGRRCopy.size * 0.25).toInt()]
+        val q3RR = optimalPPGRRCopy[(optimalPPGRRCopy.size * 0.75).toInt()]
+        optimalPPGRRCorrection = optimalPPGRRCorrection.filter {
+            value ->  (value > q1RR * 2.5 - q3RR * 1.5) && (value < q3RR * 2.5 - q1RR * 1.5)
         } as MutableList<Double>
 
-        // Reject outlier once more, use IQR
-        val optimalPPGDataRRCopy = mutableListOf<Double>()
-        optimalPPGDataRRCopy.addAll(optimalPPGRR)
-        optimalPPGDataRRCopy.sort()
-        val q1RR = optimalPPGDataRRCopy[(optimalPPGDataRRCopy.size * 0.25).toInt()]
-        val q3RR = optimalPPGDataRRCopy[(optimalPPGDataRRCopy.size * 0.75).toInt()]
-        optimalPPGRR = optimalPPGRR.filter {
-            value ->  (value > q1RR * 1.5 - q3RR * 0.5) && (value < q3RR * 1.5 - q1RR * 0.5)
-        } as MutableList<Double>
+        // optimalPPGRR.forEach{ value -> Log.d(TAG, value.toString()) }
 
-        optimalPPGRR.forEach{ value -> Log.d(TAG, value.toString()) }
-
-        /*
         // Visualize Result
         val dataSets = ArrayList<ILineDataSet>()
 
         // Draw PPG and Peaks
+        /*
         val entries = mutableListOf<Entry>()
         ppgFiltered.forEachIndexed { index, value ->
             if (index % 10 == 0 && index < ppgFiltered.size / 3) {
@@ -264,8 +273,9 @@ class MainActivity : Activity(), SensorEventListener {
 
         val peakEntries = mutableListOf<Entry>()
         optimalPPGPeak.forEach { value ->
-            if (value < ppgFiltered.size / 3)
+            if (value < ppgFiltered.size / 3) {
                 peakEntries.add(Entry(value.toFloat(), ppgFiltered[value].toFloat()))
+            }
         }
         val ppgPeakDataSet = LineDataSet(peakEntries, "HR")
         ppgPeakDataSet.color = Color.TRANSPARENT
@@ -286,12 +296,12 @@ class MainActivity : Activity(), SensorEventListener {
         chartView?.xAxis?.setDrawGridLines(false)
         chartView?.xAxis?.setDrawAxisLine(false)
         chartView?.legend?.isEnabled = false
-         */
-        return optimalPPGRR
+        */
+        return optimalPPGRRCorrection
     }
 
-    private fun analyzeRR(rrY : MutableList<Double>) {
-        if (rrY.isEmpty()) return
+    private fun analyzeRR(rrY : MutableList<Double>): Double {
+        if (rrY.isEmpty()) return Double.NaN
 
         val resampleFactor = 4
         val dataLength = (rrY.size - 1) * resampleFactor
@@ -329,33 +339,53 @@ class MainActivity : Activity(), SensorEventListener {
 
         // TODO : Implement Welch's method
 
-        // This time just DFT
+        // This time just FFT
+        val binFrequency = 1 / (rrXNew.last() - rrXNew.first())
+        val input = DoubleArray(rrXNew.size * 2)
+        val rrMagnitude = mutableListOf<Double>()
+        for (i in 0 until rrXNew.size) {
+            input[2*i] = rrYNew[i]
+            input[2*i+1] = 0.0
+        }
+        val fft = DoubleFFT_1D(rrXNew.size.toLong())
+        fft.realForward(input)
+        for (i in 0 until rrXNew.size / 2) {
+            // Unit : s^2/Hz
+            rrMagnitude.add((input[i*2] * input[i*2] + input[i*2+1] * input[i*2+1]) / binFrequency)
+        }
+
+        var lf = 0.0
+        var hf = 0.0
+        for (i in 0 until rrMagnitude.size) {
+            lf += max(min(min((i + 0.5) * binFrequency - 0.04, 0.15 - (i - 0.5) * binFrequency), binFrequency), 0.0) * rrMagnitude[i]
+            hf += max(min(min((i + 0.5) * binFrequency - 0.15, 0.40 - (i - 0.5) * binFrequency), binFrequency), 0.0) * rrMagnitude[i]
+        }
+        textView?.text = "%.2f".format(lf / hf)
 
         // RR interval Visualization
         val dataSets = ArrayList<ILineDataSet>()
-
         val rrEntries = mutableListOf<Entry>()
+        /*
         for (i in 0 until rrXNew.size) {
             rrEntries.add(Entry(rrXNew[i].toFloat(), rrYNew[i].toFloat()))
+            Log.d(TAG_RESULT, rrXNew[i].toString() + " " + rrYNew[i].toString())
+        }
+        */
+        for (i in 1 until rrMagnitude.size / 2) {
+            rrEntries.add(Entry((i * binFrequency).toFloat(), rrMagnitude[i].toFloat()))
         }
         val rrDataSet = LineDataSet(rrEntries, "RR Interval")
         rrDataSet.valueTextSize = 0.0F
         rrDataSet.setDrawCircles(false)
         dataSets.add(rrDataSet)
 
-        /*
-        val rrLineEntries = mutableListOf<Entry>()
-        for (i in 0 until rrX.size) {
-            rrLineEntries.add(Entry(rrX[i].toFloat(), rrY[i].toFloat()))
-        }
-        val rrLineDataSet = LineDataSet(rrLineEntries, "RR Interval")
-        rrLineDataSet.valueTextSize = 0.0F
-        rrLineDataSet.color = Color.RED
-        rrLineDataSet.setDrawCircles(false)
-        dataSets.add(rrLineDataSet)
-        */
-
         val data = LineData(dataSets)
+        chartView?.xAxis?.axisMaximum = 0.40F
+        chartView?.xAxis?.axisMinimum = 0.04F
+        /*
+        chartView?.axisLeft?.axisMaximum = 0.10F
+        chartView?.axisLeft?.axisMinimum = 0.00F
+        */
         chartView?.description = null
         chartView?.setViewPortOffsets(0.0F, 0.0F, 0.0F, 0.0F)
         chartView?.data = data
@@ -369,6 +399,7 @@ class MainActivity : Activity(), SensorEventListener {
         chartView?.xAxis?.setDrawGridLines(false)
         chartView?.xAxis?.setDrawAxisLine(false)
         chartView?.legend?.isEnabled = false
+        return lf / hf
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {}
