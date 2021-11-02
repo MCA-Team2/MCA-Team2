@@ -133,6 +133,27 @@
                     app:layout_constraintTop_toTopOf="@id/guideline_top_views_t"
                     tools:text="13:00 ~ 14:00" />
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="@id/guideline_graph_b"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/guideline_graph_t">
+
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/chart1"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"/>
+
+                    <com.chibde.visualizer.LineVisualizer
+                        android:id = "@+id/visualizerLine"
+                        android:layout_width = "match_parent"
+                        android:layout_height = "0dp"
+                        android:layout_weight = "1"/>
+                </LinearLayout>
+
                 <HorizontalScrollView
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
