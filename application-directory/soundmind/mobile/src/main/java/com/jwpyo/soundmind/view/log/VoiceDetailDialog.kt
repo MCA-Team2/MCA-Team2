@@ -16,7 +16,7 @@ import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
 class VoiceDetailDialog : DatabindingDialog() {
     private lateinit var binding: DialogVoiceDetailBinding
-    val viewModel: LogViewModel by sharedViewModel()
+    private val viewModel: LogViewModel by sharedViewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -20,4 +20,8 @@ data class PPG(
         accuracy: Int,
         timestamp: Long
     ) : this(null, sensorName, sensorValue, accuracy, timestamp)
+
+    companion object {
+        const val HEART_RATE_PPG_RAW_DATA = "Heart Rate PPG Raw Data"
+    }
 }

@@ -2,7 +2,6 @@ package com.jwpyo.soundmind.view.log
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -25,15 +24,16 @@ import com.jwpyo.soundmind.utils.PermissionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.io.File
 import java.io.FileWriter
 
 
 class SensorDetailDialog(
-    private val viewModel: LogViewModel,
     private val sensorName: String? = null,
 ) : DatabindingDialog() {
     private lateinit var binding: DialogSensorDetailBinding
+    private val viewModel: LogViewModel by sharedViewModel()
 
     private val permissionManager by lazy { PermissionManager(requireActivity()) }
 
@@ -114,7 +114,7 @@ class SensorDetailDialog(
 
     private fun setObservers() {
         sensorLiveData.observe(this) { ppgList ->
-            binding.detailText.text = "#${ppgList.size} of data"
+            "#${ppgList.size} of data".also { binding.detailText.text = it }
         }
     }
 

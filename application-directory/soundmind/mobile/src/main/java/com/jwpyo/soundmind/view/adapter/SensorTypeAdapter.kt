@@ -10,9 +10,7 @@ import com.skydoves.baserecyclerviewadapter.BaseAdapter
 import com.skydoves.baserecyclerviewadapter.BaseViewHolder
 import com.skydoves.baserecyclerviewadapter.SectionRow
 
-class SensorTypeAdapter(
-    private val viewModel: LogViewModel
-) : BaseAdapter() {
+class SensorTypeAdapter() : BaseAdapter() {
     init {
         addSection(arrayListOf<Any>())
     }
@@ -29,7 +27,7 @@ class SensorTypeAdapter(
 
     override fun viewHolder(layout: Int, view: View): BaseViewHolder {
         when (layout) {
-            R.layout.item_sensor_type -> return SensorTypeViewHolder(view, viewModel)
+            R.layout.item_sensor_type -> return SensorTypeViewHolder(view)
             else -> throw Resources.NotFoundException("not founded layout")
         }
 

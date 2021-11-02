@@ -10,7 +10,6 @@ import com.jwpyo.soundmind.view.log.SensorDetailDialog
 
 class SensorTypeViewHolder(
     view: View,
-    private val viewModel: LogViewModel,
 ) : BaseBindingViewHolder<ItemSensorTypeBinding>(view) {
     override fun bindData(data: Any) {
         if (data is String) {
@@ -25,7 +24,7 @@ class SensorTypeViewHolder(
 
     private fun setEventListeners(sensorName: String) {
         binding.enterButton.setOnClickListener {
-            SensorDetailDialog(viewModel, sensorName).show(view.context)
+            SensorDetailDialog(sensorName).show(view.context)
         }
     }
 }

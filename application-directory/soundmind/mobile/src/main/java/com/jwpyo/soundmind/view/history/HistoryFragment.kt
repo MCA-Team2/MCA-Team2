@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.DatabindingFragment
 import com.jwpyo.soundmind.databinding.FragmentHistoryBinding
+import com.jwpyo.soundmind.extensions.show
 import com.jwpyo.soundmind.view.main.MainViewModel
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
@@ -37,6 +38,14 @@ class HistoryFragment : DatabindingFragment() {
     }
 
     private fun setEventListeners() {
+        binding.dateDropDown.setOnClickListener {
+            DatePickerDialog(viewModel.historyDate).show(context)
+        }
+
+        // TODO> ...
+    }
+
+    private fun setObservers() {
         // TODO> ...
     }
 }
