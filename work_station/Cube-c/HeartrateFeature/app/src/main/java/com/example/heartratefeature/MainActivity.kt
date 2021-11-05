@@ -35,6 +35,7 @@ class MainActivity : Activity(), SensorEventListener {
 
     private val TYPE_PPG_RAW = 65572
     private val TAG_RESULT = "MCA_RESULT"
+    private val TAG_CALC = "MCA_CALC"
     private val TAG_RAW = "MCA_RAW"
 
     // PPG related
@@ -100,7 +101,7 @@ class MainActivity : Activity(), SensorEventListener {
                     timestampStart = timestamp
                 }
             }
-            // Log.d(TAG_RAW, "$timestamp $value")
+            Log.d(TAG_RAW, "$timestamp $value")
             ppgData.add(value.toDouble())
         }
     }
@@ -344,8 +345,7 @@ class MainActivity : Activity(), SensorEventListener {
         val input = DoubleArray(rrXNew.size * 2)
         val rrMagnitude = mutableListOf<Double>()
         for (i in 0 until rrXNew.size) {
-            input[2*i] = rrYNew[i]
-            input[2*i+1] = 0.0
+            input[i] = rrYNew[i]
         }
         val fft = DoubleFFT_1D(rrXNew.size.toLong())
         fft.realForward(input)
@@ -360,31 +360,31 @@ class MainActivity : Activity(), SensorEventListener {
             lf += max(min(min((i + 0.5) * binFrequency - 0.04, 0.15 - (i - 0.5) * binFrequency), binFrequency), 0.0) * rrMagnitude[i]
             hf += max(min(min((i + 0.5) * binFrequency - 0.15, 0.40 - (i - 0.5) * binFrequency), binFrequency), 0.0) * rrMagnitude[i]
         }
-        Log.d(TAG_RESULT, "LF : $lf")
-        Log.d(TAG_RESULT, "HF : $hf")
         textView?.text = "%.2f".format(lf / hf)
 
         // RR interval Visualization
         val dataSets = ArrayList<ILineDataSet>()
         val rrEntries = mutableListOf<Entry>()
-        /*
         for (i in 0 until rrXNew.size) {
             rrEntries.add(Entry(rrXNew[i].toFloat(), rrYNew[i].toFloat()))
-            Log.d(TAG_RESULT, rrXNew[i].toString() + " " + rrYNew[i].toString())
+            Log.d(TAG_RESULT, "%.4f %.4f".format(rrXNew[i], rrYNew[i]))
         }
-        */
+        Log.d(TAG_CALC, "LF : $lf")
+        Log.d(TAG_CALC, "HF : $hf")
+        /*
         for (i in 1 until rrMagnitude.size / 2) {
             rrEntries.add(Entry((i * binFrequency).toFloat(), rrMagnitude[i].toFloat()))
         }
+        */
         val rrDataSet = LineDataSet(rrEntries, "RR Interval")
         rrDataSet.valueTextSize = 0.0F
         rrDataSet.setDrawCircles(false)
         dataSets.add(rrDataSet)
 
         val data = LineData(dataSets)
+        /*
         chartView?.xAxis?.axisMaximum = 0.40F
         chartView?.xAxis?.axisMinimum = 0.04F
-        /*
         chartView?.axisLeft?.axisMaximum = 0.10F
         chartView?.axisLeft?.axisMinimum = 0.00F
         */
