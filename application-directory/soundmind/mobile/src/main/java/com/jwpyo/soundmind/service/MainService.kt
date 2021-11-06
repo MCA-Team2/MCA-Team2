@@ -129,8 +129,8 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
                 Log.e("hello", "hello ${ppgCache.size}")
 
                 runCatching {
-                    val stress = ppgConverter.getStress(ppgList.toTypedArray())
-                    if (stress != null) mainViewModel.insertStress(stress)
+                    val stress = ppgConverter.getStress(ppgCache.toTypedArray())!!
+                    mainViewModel.insertStress(stress)
                 }.onSuccess {
                     Log.e("hello", "hello success!!!")
                     ppgCache.clear()

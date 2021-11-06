@@ -3,6 +3,9 @@
     <color name="background">#ddd</color>
     <color name="main">#7c7</color>
     <color name="sub">#dfd</color>
+    <color name="stress">#c77</color>
+    <color name="audio">#77c</color>
+    <color name="grid">#666</color>
     <color name="font">#333</color>
 
     <color name="transparent">#00000000</color>

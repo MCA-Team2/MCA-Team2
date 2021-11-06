@@ -1,13 +1,15 @@
 package com.jwpyo.soundmind.view.history
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.text.TextPaint
 import android.util.AttributeSet
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
+import android.util.Log
+import android.widget.FrameLayout
+import androidx.core.content.ContextCompat
+import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.model.stress.Stress
 import org.threeten.bp.LocalDateTime
 
@@ -16,67 +18,89 @@ constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-) : LineChart(context, attrs, defStyleAttr) {
-    private val colorGray = Color.parseColor("#EEEEEE")
-    private val colorBackground = Color.parseColor("#F1F1F1")
-    private val colorText = Color.parseColor("#707070")
+) : FrameLayout(context, attrs, defStyleAttr) {
+    private val gridPaint = Paint().apply {
+        color = ContextCompat.getColor(context, R.color.grid)
+        style = Paint.Style.STROKE
+    }
 
-    fun setData(source: List<Stress>) {
-        if (source.isEmpty()) return
+    private val linePaint = Paint().apply {
+        color = ContextCompat.getColor(context, R.color.stress)
+        strokeWidth = 3f
+        style = Paint.Style.STROKE
+    }
 
-        val lineSet = LineDataSet(
-            source.map { Entry(it.x, it.y) },
-            "line data set"
-        ).also { it.initDefaultAttributes() }
+    private val dotPaint = Paint().apply {
+        color = ContextCompat.getColor(context, R.color.stress)
+        style = Paint.Style.FILL
+    }
 
-        data = LineData(lineSet)
+    private var source: List<Stress>? = null
+    private var x1: Int = 0
+    private var x2: Int = 24
+    private var dotRadius: Float = 5f
+
+    fun setData(_source: List<Stress>) {
+        if (_source.isEmpty()) return
+        source = _source
+
         invalidate()
     }
 
-    fun setScope(left: LocalDateTime, right: LocalDateTime) {
-        xAxis.axisMaximum = left.hour.toFloat() + 1
-        xAxis.axisMinimum = right.hour.toFloat()
-        layoutParams.width = WIDTH_PER_HOUR * (right.hour - left.hour + 1)
+    fun setScope(left: Int, right: Int) {
+        layoutParams = layoutParams.apply {
+            width = VoiceVolumeChart.WIDTH_PER_HOUR * (right - left)
+        }
+        x1 = left
+        x2 = right
+
+        invalidate()
     }
 
-    private fun initDefaultAttributes() {
-        axisLeft.axisMaximum = 2.5f
-        axisLeft.axisMinimum = -2.5f
-        axisLeft.isEnabled = false
-        axisRight.isEnabled = false
-        description.isEnabled = false
-        isDragEnabled = false
-        isScaleXEnabled = false
-        isScaleYEnabled = false
-        legend.isEnabled = false
-        xAxis.granularity = 1f
-        xAxis.axisMaximum = 24f
-        xAxis.axisMinimum = 0f
-        xAxis.gridColor = colorBackground
-        xAxis.gridLineWidth = 1f
-        xAxis.position = XAxis.XAxisPosition.BOTTOM_INSIDE
-        xAxis.setDrawAxisLine(false)
-        xAxis.textColor = colorText
+    @SuppressLint("DrawAllocation")
+    override fun onDraw(canvas: Canvas?) {
+        Log.e("hello", "hello voice chart on draw")
+        super.onDraw(canvas)
+        if (source == null) return
 
-        setBackgroundColor(Color.TRANSPARENT)
-        setExtraOffsets(0f, 0f, 0f, 0f)
-        setTouchEnabled(false)
-        setViewPortOffsets(0f, 0f, 0f, 2f)
-    }
+        val w = measuredWidth.toFloat()
+        val h = measuredHeight.toFloat()
+        val marginTop = 0.1f
+        val marginBot = 0.1f
 
-    private fun LineDataSet.initDefaultAttributes() {
-        setDrawValues(false)
-        setDrawCircleHole(true)
-        setDrawCircles(true)
-        circleColors = mutableListOf(colorGray)
-        circleRadius = 4f
-        circleHoleRadius = 2f
-        color = colorGray
-        lineWidth = 3f
+        canvas?.apply {
+            Log.e("hello", "hello $source")
+            if (source == null) return@apply
+
+            (x1..x2).forEach { x ->
+                drawLine(
+                    (x - x1).toFloat() * WIDTH_PER_HOUR,
+                    0f,
+                    (x - x1).toFloat() * WIDTH_PER_HOUR,
+                    h,
+                    gridPaint
+                )
+            }
+
+            source!!.indices.forEach { i ->
+                val p1 = Pair(
+                    (source!![i].x - x1) * WIDTH_PER_HOUR,
+                    (1 - source!![i].y) * h * (1 - marginTop - marginBot) + h * marginTop
+                )
+                if (i < source!!.size - 1) {
+                    val p2 = Pair(
+                        (source!![i + 1].x - x1) * WIDTH_PER_HOUR,
+                        (1 - source!![i + 1].y) * h * (1 - marginTop - marginBot) + h * marginTop
+                    )
+                    drawLine(p1.first, p1.second, p2.first, p2.second, linePaint)
+                }
+                drawCircle(p1.first, p1.second, dotRadius, dotPaint)
+            }
+        }
     }
 
     init {
-        initDefaultAttributes()
+        setWillNotDraw(false)
     }
 
     companion object {

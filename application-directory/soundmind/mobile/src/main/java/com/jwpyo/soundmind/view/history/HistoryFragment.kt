@@ -14,6 +14,7 @@ import com.jwpyo.soundmind.base.DatabindingFragment
 import com.jwpyo.soundmind.databinding.FragmentHistoryBinding
 import com.jwpyo.soundmind.extensions.show
 import com.jwpyo.soundmind.model.stress.Stress
+import com.jwpyo.soundmind.model.ui.VolumeItem
 import com.jwpyo.soundmind.view.main.MainViewModel
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
@@ -21,6 +22,12 @@ import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 class HistoryFragment : DatabindingFragment() {
     private lateinit var binding: FragmentHistoryBinding
     private val viewModel by sharedViewModel<MainViewModel>()
+
+    private var volumeLiveData: LiveData<List<VolumeItem>>? = null
+    private var volumeObserver: Observer<List<VolumeItem>>? = null
+
+    private var stressLiveData: LiveData<List<Stress>>? = null
+    private var stressObserver: Observer<List<Stress>>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,19 +63,45 @@ class HistoryFragment : DatabindingFragment() {
         }
     }
 
-    private var liveData: LiveData<List<Stress>>? = null
-    private var observer: Observer<List<Stress>>? = null
     private fun setObservers() {
-        viewModel.stress.asLiveData().observe(viewLifecycleOwner) { stressListFlow ->
-            if (liveData != null && observer != null)
-                liveData!!.removeObserver(observer!!)
+        viewModel.hourScope.asLiveData().observe(viewLifecycleOwner) { (min, max) ->
+            Log.e("hello", "hello $min, $max")
+            binding.volumeChart.setScope(min, max)
+            binding.stressChart.setScope(min, max)
+        }
 
-            liveData = stressListFlow.asLiveData()
-            observer = Observer {
-                if (it.isEmpty()) binding.chartStress.setData(StressLineChart.defaultInfo)
-                else binding.chartStress.setData(it)
+        viewModel.volume.asLiveData().observe(viewLifecycleOwner) { volumeListFlow ->
+            if (volumeLiveData != null && volumeObserver != null)
+                volumeLiveData!!.removeObserver(volumeObserver!!)
+
+            volumeLiveData = volumeListFlow.asLiveData()
+            volumeObserver = Observer {
+                viewModel.volumeChartInfo.postValue(
+                    if (it.isEmpty()) VoiceVolumeChart.defaultInfo else it
+                )
             }
-            liveData!!.observe(viewLifecycleOwner, observer!!)
+            volumeLiveData!!.observe(viewLifecycleOwner, volumeObserver!!)
+        }
+
+        viewModel.stress.asLiveData().observe(viewLifecycleOwner) { stressListFlow ->
+            if (stressLiveData != null && stressObserver != null)
+                stressLiveData!!.removeObserver(stressObserver!!)
+
+            stressLiveData = stressListFlow.asLiveData()
+            stressObserver = Observer {
+                viewModel.stressChartInfo.postValue(
+                    if (it.isEmpty()) StressLineChart.defaultInfo else it
+                )
+            }
+            stressLiveData!!.observe(viewLifecycleOwner, stressObserver!!)
+        }
+
+        viewModel.volumeChartInfo.observe(viewLifecycleOwner) { volumeInfo ->
+            binding.volumeChart.setData(volumeInfo)
+        }
+
+        viewModel.stressChartInfo.observe(viewLifecycleOwner) { stressInfo ->
+            binding.stressChart.setData(stressInfo)
         }
     }
 }

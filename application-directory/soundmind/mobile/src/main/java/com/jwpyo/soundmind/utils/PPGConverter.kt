@@ -12,20 +12,16 @@ import uk.me.berndporr.iirj.Butterworth
 class PPGConverter {
 
     fun getStress(ppgList: Array<PPG>): Stress? {
-        if (ppgList.isEmpty()) return null
-
+        if (ppgList.size < REQUIRE_SAMPLE_NUMBER) return null
         val ldt = ppgList.maxOf { it.ldt }
         val stressValue = analyzeRR(
-            analyzePPG(
-                ppgList.map { ppg -> ppg.sensorValue.toDouble() }.toMutableList()
-            )
+            analyzePPG(ppgList.map { ppg -> ppg.sensorValue.toDouble() }.toMutableList())
         ).toFloat()
         return Stress(ldt, stressValue)
     }
 
     private fun analyzePPG(ppgRaw: MutableList<Double>): MutableList<Double> {
         val samplingFrequency: Double = ppgRaw.size / ANALYSIS_INTERVAL.toDouble()
-        Log.e("hello", "hello ppgsize = ${ppgRaw.size} / sf = $samplingFrequency")
         val ppgFiltered = mutableListOf<Double>()
         ppgFiltered.addAll(ppgRaw)
 
@@ -272,7 +268,7 @@ class PPGConverter {
     }
 
     companion object {
-        const val REQUIRE_SAMPLE_NUMBER: Int = 1000
+        const val REQUIRE_SAMPLE_NUMBER: Int = 10000
         const val ANALYSIS_INTERVAL: Long = 300L // in seconds
         const val CENTER_FREQUENCY: Double = 2.1 // Hz
         const val WIDTH_FREQUENCY: Double = 2.8 // Hz

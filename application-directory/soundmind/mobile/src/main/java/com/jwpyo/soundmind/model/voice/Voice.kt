@@ -14,9 +14,10 @@ data class Voice(
     val endLDT: LocalDateTime,
     val receiveLDT: LocalDateTime,
     val array: ByteArray,
+    val volume: Float,
 ) : Parcelable {
-    constructor(startLDT: LocalDateTime, endLDT: LocalDateTime, array: ByteArray) :
-            this(null, startLDT, endLDT, LocalDateTime.now(), array)
+    constructor(startLDT: LocalDateTime, endLDT: LocalDateTime, array: ByteArray, volume: Float) :
+            this(null, startLDT, endLDT, LocalDateTime.now(), array, volume)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -18,5 +18,5 @@ data class Stress(
     constructor(ldt: LocalDateTime, value: Float) : this(null, ldt, value)
 
     val x: Float get() = ldt.toLocalTime().toSecondOfDay().toFloat() / 60 / 60
-    val y: Float get() = log2(value.clamp(0.25f, 4f))
+    val y: Float get() = (log2(value.clamp(0.25f, 4f)) + 2) / 4
 }

@@ -20,7 +20,7 @@ object Constant {
 
     const val RECORDING_RATE = 8000 // can go up to 44K, if needed
     const val AUDIO_CHUNK_SIZE = 960000 // 16000 per sec
-    const val PPG_CHUNK_SIZE = 1000 // almost 100 per sec
+    const val PPG_CHUNK_SIZE = 3000 // almost 100 per sec
 
     const val REQUEST_PERMISSION_CODE = 2
 }

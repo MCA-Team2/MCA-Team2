@@ -13,6 +13,9 @@ class StressRepositoryImpl(
     }
 
     override fun getStresses(date: LocalDate): Flow<List<Stress>> {
-        return stressDao.getStresses(date.atStartOfDay(), date.plusDays(1).atStartOfDay())
+        return stressDao.getStresses(
+            date.atStartOfDay(),
+            date.plusDays(1).atStartOfDay()
+        )
     }
 }
