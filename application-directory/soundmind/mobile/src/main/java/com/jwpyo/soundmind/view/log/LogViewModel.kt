@@ -1,13 +1,10 @@
 package com.jwpyo.soundmind.view.log
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
-import com.jwpyo.soundmind.model.ppg.PPG
 import com.jwpyo.soundmind.model.ui.VoiceItem
 import com.jwpyo.soundmind.model.voice.Voice
-import com.jwpyo.soundmind.repository.PPGRepository
 import com.jwpyo.soundmind.repository.VoiceRepository
 import com.jwpyo.soundmind.utils.SoundPlayer
 import kotlinx.coroutines.CoroutineScope
@@ -20,15 +17,11 @@ import java.io.ByteArrayInputStream
 class LogViewModel(
     private val soundPlayer: SoundPlayer,
     private val voiceRepository: VoiceRepository,
-    private val ppgRepository: PPGRepository,
 ) : ViewModel() {
     val voiceItems: LiveData<List<VoiceItem>> =
         voiceRepository.getVoices().map {
             it.map { voice -> VoiceItem(voice) }
         }.asLiveData()
-
-    val ppgList: LiveData<List<PPG>> =
-        ppgRepository.getPPGs().asLiveData()
 
     private var playingJob: Job? = null
     var isPlaying: Long? = null

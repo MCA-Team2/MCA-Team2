@@ -19,5 +19,5 @@ val persistenceModule = module {
             .build()
     }
     single { get<AppDatabase>().getVoiceDao() }
-    single { get<AppDatabase>().getPPGDao() }
+    single { get<AppDatabase>().getStressDao() }
 }

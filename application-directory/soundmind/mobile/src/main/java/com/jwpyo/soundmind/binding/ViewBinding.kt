@@ -6,6 +6,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.jwpyo.soundmind.R
+import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
@@ -52,4 +53,12 @@ fun bindingLDTText(view: TextView, ldt: LocalDateTime?) {
         if (ldt == null) "invalid time"
         else ldt.format(DateTimeFormatter.ofPattern("MM/dd HH:mm:ss"))
 }
+
+@BindingAdapter("date_text")
+fun bindingLDTText(view: TextView, dt: LocalDate?) {
+    view.text =
+        if (dt == null) "invalid time"
+        else dt.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"))
+}
+
 

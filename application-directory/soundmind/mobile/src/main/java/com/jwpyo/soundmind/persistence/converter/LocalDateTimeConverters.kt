@@ -15,14 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.bluesignum.counselor.persistence.converter
+package com.jwpyo.soundmind.persistence.converter
 
+import androidx.room.TypeConverter
+import com.jwpyo.soundmind.extensions.toLocalDateTime
+import com.jwpyo.soundmind.extensions.toTimestamp
 import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.LocalTime
 
-class LocalDateTimeConverter : BaseConverter<LocalDateTime>() {
-    override fun objectFromString(value: String): LocalDateTime? = LocalDateTime.parse(value)
+class LocalDateTimeConverter {
+    @TypeConverter
+    fun toLong(value: LocalDateTime): Long = value.toTimestamp()
+
+    @TypeConverter
+    fun fromLong(value: Long): LocalDateTime = value.toLocalDateTime()
 }
 
 class LocalDateConverter : BaseConverter<LocalDate>() {

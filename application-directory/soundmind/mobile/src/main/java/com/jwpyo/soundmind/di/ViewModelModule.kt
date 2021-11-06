@@ -9,5 +9,5 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
     viewModel { MainViewModel(Wearable.getDataClient(androidContext()), get(), get()) }
-    viewModel { LogViewModel(get(), get(), get()) }
+    viewModel { LogViewModel(get(), get()) }
 }

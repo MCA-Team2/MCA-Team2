@@ -12,202 +12,201 @@
 
     </data>
 
-    <FrameLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ScrollView
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:layout_height="wrap_content"
+            android:background="@color/background">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_top_views_t"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="15dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_top_views_b"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="50dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_graph_t"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="75dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_graph_b"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="550dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_index_t"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="600dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_index_b"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="700dp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/background">
-
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guideline_top_views_t"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    app:layout_constraintGuide_begin="15dp" />
-
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guideline_top_views_b"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    app:layout_constraintGuide_begin="45dp" />
-
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guideline_graph_t"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    app:layout_constraintGuide_begin="50dp" />
-
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guideline_graph_b"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    app:layout_constraintGuide_begin="550dp" />
-
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guideline_index_t"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    app:layout_constraintGuide_begin="600dp" />
-
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guideline_index_b"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    app:layout_constraintGuide_begin="700dp" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/date_container"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="15dp"
-                    android:background="@drawable/shape_rectangle_font_round3_border"
-                    android:paddingStart="15dp"
-                    android:paddingEnd="0dp"
-                    app:layout_constraintBottom_toBottomOf="@id/guideline_top_views_b"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/guideline_top_views_t">
-
-                    <TextView
-                        android:id="@+id/date_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/date_drop_down"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:text="2021.10.27" />
-
-                    <ImageView
-                        android:id="@+id/date_drop_down"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/content_description_default"
-                        android:src="@drawable/ic_baseline_arrow_drop_down_24"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/date_text"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <ImageButton
-                    android:id="@+id/audio_file_export_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="15dp"
-                    android:background="@color/transparent"
-                    android:contentDescription="@string/content_description_default"
-                    android:src="@drawable/ic_baseline_volume_up_24"
-                    app:layout_constraintBottom_toBottomOf="@id/guideline_top_views_b"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/guideline_top_views_t"
-                    app:tint="@color/main" />
+                android:id="@+id/date_container"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="15dp"
+                android:background="@drawable/shape_rectangle_font_round3_border"
+                android:paddingStart="15dp"
+                android:paddingEnd="0dp"
+                app:layout_constraintBottom_toBottomOf="@id/guideline_top_views_b"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/guideline_top_views_t">
 
                 <TextView
+                    android:id="@+id/date_text"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:background="@drawable/shape_rectangle_font_round3_border"
-                    android:gravity="center"
-                    android:paddingHorizontal="15dp"
+                    android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@id/guideline_top_views_b"
-                    app:layout_constraintEnd_toStartOf="@id/audio_file_export_button"
-                    app:layout_constraintHorizontal_bias="0.1"
-                    app:layout_constraintStart_toEndOf="@id/date_container"
-                    app:layout_constraintTop_toTopOf="@id/guideline_top_views_t"
-                    tools:text="13:00 ~ 14:00" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:orientation="vertical"
-                    app:layout_constraintBottom_toBottomOf="@id/guideline_graph_b"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/date_drop_down"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/guideline_graph_t">
+                    app:layout_constraintTop_toTopOf="parent"
+                    bind:date_text="@{vm.historyDateLiveData}"
+                    tools:text="2021.10.27" />
 
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/chart1"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"/>
-
-                    <com.chibde.visualizer.LineVisualizer
-                        android:id = "@+id/visualizerLine"
-                        android:layout_width = "match_parent"
-                        android:layout_height = "0dp"
-                        android:layout_weight = "1"/>
-                </LinearLayout>
-
-                <HorizontalScrollView
+                <ImageView
+                    android:id="@+id/date_drop_down"
                     android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:fillViewport="true"
-                    android:overScrollMode="never"
-                    android:scrollbars="none"
-                    app:layout_constraintBottom_toBottomOf="@id/guideline_index_b"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/guideline_index_t">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <include
-                            layout="@layout/module_history_index"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_marginHorizontal="10dp"
-                            bind:title="@{&quot;소리 크기&quot;}"
-                            bind:value="@{&quot;작음&quot;}" />
-
-                        <include
-                            layout="@layout/module_history_index"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_marginHorizontal="10dp"
-                            bind:title="@{&quot;스트레스&quot;}"
-                            bind:value="@{&quot;높음&quot;}" />
-
-                        <include
-                            layout="@layout/module_history_index"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_marginHorizontal="10dp"
-                            bind:title="@{&quot;중요 시간&quot;}"
-                            bind:value="@{&quot;13:01 ~ 13:05&quot;}" />
-
-                        <include
-                            layout="@layout/module_history_index"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_marginHorizontal="10dp" />
-
-                    </LinearLayout>
-
-                </HorizontalScrollView>
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/content_description_default"
+                    android:src="@drawable/ic_baseline_arrow_drop_down_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/date_text"
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <ImageButton
+                android:id="@+id/audio_file_export_button"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginEnd="15dp"
+                android:adjustViewBounds="true"
+                android:background="@color/transparent"
+                android:contentDescription="@string/content_description_default"
+                android:src="@drawable/ic_baseline_volume_up_24"
+                app:layout_constraintBottom_toBottomOf="@id/guideline_top_views_b"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/guideline_top_views_t"
+                app:tint="@color/main" />
 
-        </ScrollView>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@color/white"
+                app:layout_constraintBottom_toBottomOf="@id/guideline_graph_b"
+                app:layout_constraintTop_toTopOf="@id/guideline_graph_t" />
 
-    </FrameLayout>
+
+            <HorizontalScrollView
+                android:id="@+id/chart_scroll_view"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:fillViewport="true"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                app:layout_constraintBottom_toBottomOf="@id/guideline_graph_b"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/guideline_graph_t">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <com.jwpyo.soundmind.view.history.StressLineChart
+                        android:id="@+id/stress_chart"
+                        android:layout_width="10dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <com.jwpyo.soundmind.view.history.VoiceVolumeChart
+                        android:id="@+id/volume_chart"
+                        android:layout_width="10dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+            <HorizontalScrollView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:fillViewport="true"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                app:layout_constraintBottom_toBottomOf="@id/guideline_index_b"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/guideline_index_t">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <include
+                        layout="@layout/module_history_index"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginHorizontal="10dp"
+                        bind:title="@{&quot;소리 크기&quot;}"
+                        bind:value="@{&quot;작음&quot;}" />
+
+                    <include
+                        layout="@layout/module_history_index"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginHorizontal="10dp"
+                        bind:title="@{&quot;스트레스&quot;}"
+                        bind:value="@{&quot;높음&quot;}" />
+
+                    <include
+                        layout="@layout/module_history_index"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginHorizontal="10dp"
+                        bind:title="@{&quot;중요 시간&quot;}"
+                        bind:value="@{&quot;13:01 ~ 13:05&quot;}" />
+
+                    <include
+                        layout="@layout/module_history_index"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginHorizontal="10dp" />
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </ScrollView>
 
 </layout>
