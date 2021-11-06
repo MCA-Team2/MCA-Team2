@@ -35,11 +35,12 @@ class HistoryFragment : DatabindingFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setEventListeners()
+        initStressChart()
     }
 
     private fun setEventListeners() {
         binding.dateDropDown.setOnClickListener {
-            DatePickerDialog(viewModel.historyDate).show(context)
+            DatePickerDialog(viewModel.historyDateLiveData).show(context)
         }
 
         // TODO> ...
@@ -47,5 +48,9 @@ class HistoryFragment : DatabindingFragment() {
 
     private fun setObservers() {
         // TODO> ...
+    }
+
+    private fun initStressChart() {
+        binding.chartStress.setData(StressLineChart.defaultInfo)
     }
 }

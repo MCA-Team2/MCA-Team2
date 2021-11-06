@@ -114,10 +114,11 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
             val dataMapItem = DataMapItem.fromDataItem(dataEvent.dataItem)
             val sensorValue = dataMapItem.dataMap.getFloatArray(SENSOR_VALUE_KEY)!!
             val accuracy = dataMapItem.dataMap.getLongArray(ACCURACY_KEY)!!
-            val timestamp = dataMapItem.dataMap.getLongArray(TIME_STAMP_KEY)!!
+            val ldt = dataMapItem.dataMap.getStringArray(TIME_STAMP_KEY)!!
+                .map { LocalDateTime.parse(it) }
 
             val ppgList = sensorValue.indices.map { i ->
-                PPG(sensorName, sensorValue[i], accuracy[i].toInt(), timestamp[i])
+                PPG(sensorName, sensorValue[i], accuracy[i].toInt(), ldt[i])
             }
             mainViewModel.insertPPG(ppgList)
         }.onFailure {

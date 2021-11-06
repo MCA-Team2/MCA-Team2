@@ -6,9 +6,13 @@ import com.google.android.gms.wearable.DataClient
 import com.jwpyo.soundmind.extensions.getByteArrayFromAsset
 import com.jwpyo.soundmind.model.ppg.PPG
 import com.jwpyo.soundmind.model.ppg.PPG.Companion.HEART_RATE_PPG_RAW_DATA
+import com.jwpyo.soundmind.model.ui.StressItem
 import com.jwpyo.soundmind.model.voice.Voice
 import com.jwpyo.soundmind.repository.PPGRepository
 import com.jwpyo.soundmind.repository.VoiceRepository
+import com.jwpyo.soundmind.view.history.StressLineChart
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDate
@@ -20,19 +24,18 @@ class MainViewModel(
     private val voiceRepository: VoiceRepository,
     private val ppgRepository: PPGRepository,
 ) : ViewModel() {
-    val historyDate: MutableLiveData<LocalDate> = MutableLiveData(LocalDate.now())
-    val heartRatePPGRawData: LiveData<List<PPG>>
+    val ppgLiveData: LiveData<List<PPG>>
+
+    val historyDate: Flow<LocalDate>
+    val ppg: Flow<List<PPG>>
+    val stress: Flow<List<StressItem>>
+
+    val historyDateLiveData: MutableLiveData<LocalDate> = MutableLiveData(LocalDate.now())
 
     fun insertVoice(asset: Asset, startLDT: LocalDateTime, endLDT: LocalDateTime) {
         viewModelScope.launch {
             voiceRepository.insertVoice(
-                Voice(
-                    null,
-                    startLDT,
-                    endLDT,
-                    LocalDateTime.now(),
-                    dataClient.getByteArrayFromAsset(asset)
-                )
+                Voice(startLDT, endLDT, dataClient.getByteArrayFromAsset(asset))
             )
         }
     }
@@ -44,8 +47,19 @@ class MainViewModel(
     }
 
     init {
-        heartRatePPGRawData = ppgRepository.getPPGs().map { ppgList ->
-            ppgList.filter { it.sensorName == HEART_RATE_PPG_RAW_DATA }
-        }.asLiveData()
+        historyDate = historyDateLiveData.asFlow()
+
+        ppg = combine(
+            ppgRepository.getPPGs(), historyDate
+        ) { ppgList, date ->
+            ppgList.filter { it.sensorName == HEART_RATE_PPG_RAW_DATA && it.ldt.toLocalDate() == date }
+        }
+
+        stress = ppg.map { ppgList ->
+            //TODO : calc. ppg -> stress
+            StressLineChart.defaultInfo
+        }
+
+        ppgLiveData = ppg.asLiveData()
     }
 }

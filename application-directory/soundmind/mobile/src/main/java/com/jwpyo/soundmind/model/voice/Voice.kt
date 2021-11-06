@@ -10,11 +10,14 @@ import org.threeten.bp.LocalDateTime
 @Parcelize
 data class Voice(
     @PrimaryKey(autoGenerate = true) val id: Long?,
-    val receiveLDT: LocalDateTime,
     val startLDT: LocalDateTime,
     val endLDT: LocalDateTime,
+    val receiveLDT: LocalDateTime,
     val array: ByteArray,
 ) : Parcelable {
+    constructor(startLDT: LocalDateTime, endLDT: LocalDateTime, array: ByteArray) :
+            this(null, startLDT, endLDT, LocalDateTime.now(), array)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

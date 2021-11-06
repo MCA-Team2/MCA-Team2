@@ -85,7 +85,7 @@
                     app:layout_constraintEnd_toStartOf="@id/date_drop_down"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    bind:date_text="@{vm.historyDate}"
+                    bind:date_text="@{vm.historyDateLiveData}"
                     tools:text="2021.10.27" />
 
                 <ImageView
@@ -130,9 +130,9 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <com.github.mikephil.charting.charts.LineChart
+                    <com.jwpyo.soundmind.view.history.StressLineChart
                         android:id="@+id/chart_stress"
-                        android:layout_width="match_parent"
+                        android:layout_width="1440dp"
                         android:layout_height="0dp"
                         android:layout_weight="1" />
 
