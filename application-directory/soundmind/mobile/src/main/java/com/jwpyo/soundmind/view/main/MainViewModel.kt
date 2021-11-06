@@ -10,10 +10,9 @@ import com.jwpyo.soundmind.model.ui.StressItem
 import com.jwpyo.soundmind.model.voice.Voice
 import com.jwpyo.soundmind.repository.PPGRepository
 import com.jwpyo.soundmind.repository.VoiceRepository
-import com.jwpyo.soundmind.view.history.StressLineChart
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import com.jwpyo.soundmind.utils.PPGConverter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalDateTime
@@ -21,6 +20,7 @@ import org.threeten.bp.LocalDateTime
 @Suppress("JoinDeclarationAndAssignment")
 class MainViewModel(
     private val dataClient: DataClient,
+    private val ppgConverter: PPGConverter,
     private val voiceRepository: VoiceRepository,
     private val ppgRepository: PPGRepository,
 ) : ViewModel() {
@@ -55,10 +55,10 @@ class MainViewModel(
             ppgList.filter { it.sensorName == HEART_RATE_PPG_RAW_DATA && it.ldt.toLocalDate() == date }
         }
 
-        stress = ppg.map { ppgList ->
-            //TODO : calc. ppg -> stress
-            StressLineChart.defaultInfo
-        }
+        stress = ppg
+            .map { ppgList -> ppgConverter.getStressList(ppgList.toTypedArray()) }
+            .flowOn(Dispatchers.IO)
+            .catch { emit(listOf()) }
 
         ppgLiveData = ppg.asLiveData()
     }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.asLiveData
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.DatabindingFragment
 import com.jwpyo.soundmind.databinding.FragmentHistoryBinding
@@ -35,7 +36,7 @@ class HistoryFragment : DatabindingFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setEventListeners()
-        initStressChart()
+        setObservers()
     }
 
     private fun setEventListeners() {
@@ -47,10 +48,8 @@ class HistoryFragment : DatabindingFragment() {
     }
 
     private fun setObservers() {
-        // TODO> ...
-    }
-
-    private fun initStressChart() {
-        binding.chartStress.setData(StressLineChart.defaultInfo)
+        viewModel.stress.asLiveData().observe(viewLifecycleOwner) {
+            binding.chartStress.setData(it)
+        }
     }
 }

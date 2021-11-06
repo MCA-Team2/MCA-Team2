@@ -9,7 +9,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.jwpyo.soundmind.model.ui.StressItem
-import java.time.LocalDate
+import org.threeten.bp.LocalDate
 
 class StressLineChart @JvmOverloads
 constructor(
@@ -25,7 +25,7 @@ constructor(
         if (source.isEmpty()) return
 
         val lineSet = LineDataSet(
-            source.map { Entry(it.x / 60 / 60, it.value) },
+            source.map { Entry(it.x, it.y) },
             "line data set"
         ).also { it.initDefaultAttributes() }
 
@@ -37,8 +37,8 @@ constructor(
     }
 
     private fun initDefaultAttributes() {
-        axisLeft.axisMaximum = 1f
-        axisLeft.axisMinimum = 0f
+        axisLeft.axisMaximum = 2f
+        axisLeft.axisMinimum = -2f
         axisLeft.isEnabled = false
         axisRight.isEnabled = false
         description.isEnabled = false
@@ -74,15 +74,5 @@ constructor(
 
     init {
         initDefaultAttributes()
-    }
-
-    companion object {
-        val defaultInfo: List<StressItem> = listOf(
-            StressItem(LocalDate.now().atTime(9, 10), 0.4f),
-            StressItem(LocalDate.now().atTime(9, 20), 0.2f),
-            StressItem(LocalDate.now().atTime(9, 30), 0.6f),
-            StressItem(LocalDate.now().atTime(9, 40), 0.7f),
-            StressItem(LocalDate.now().atTime(9, 50), 0.6f),
-        )
     }
 }

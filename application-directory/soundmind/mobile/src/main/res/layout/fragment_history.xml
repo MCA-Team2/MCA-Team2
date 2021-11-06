@@ -132,7 +132,7 @@
 
                     <com.jwpyo.soundmind.view.history.StressLineChart
                         android:id="@+id/chart_stress"
-                        android:layout_width="1440dp"
+                        android:layout_width="720dp"
                         android:layout_height="0dp"
                         android:layout_weight="1" />
 
