@@ -33,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                app:layout_constraintGuide_begin="55dp" />
+                app:layout_constraintGuide_begin="50dp" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline_graph_t"
@@ -104,8 +104,9 @@
             <ImageButton
                 android:id="@+id/audio_file_export_button"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:layout_marginEnd="15dp"
+                android:adjustViewBounds="true"
                 android:background="@color/transparent"
                 android:contentDescription="@string/content_description_default"
                 android:src="@drawable/ic_baseline_volume_up_24"
@@ -113,21 +114,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/guideline_top_views_t"
                 app:tint="@color/main" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:background="@drawable/shape_rectangle_font_round3_border"
-                android:gravity="center"
-                android:paddingHorizontal="15dp"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@id/guideline_top_views_b"
-                app:layout_constraintEnd_toStartOf="@id/audio_file_export_button"
-                app:layout_constraintHorizontal_bias="0.1"
-                app:layout_constraintStart_toEndOf="@id/date_container"
-                app:layout_constraintTop_toTopOf="@id/guideline_top_views_t"
-                tools:text="13:00 ~ 14:00" />
 
             <HorizontalScrollView
                 android:layout_width="wrap_content"
@@ -145,13 +131,13 @@
                     android:orientation="vertical">
 
                     <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/chart1"
+                        android:id="@+id/chart_stress"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1" />
 
                     <com.chibde.visualizer.LineVisualizer
-                        android:id="@+id/visualizerLine"
+                        android:id="@+id/chart_audio"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1" />

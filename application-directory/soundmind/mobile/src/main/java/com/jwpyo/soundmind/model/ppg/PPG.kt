@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
+import org.threeten.bp.LocalDateTime
 
 @Entity
 @Parcelize
@@ -12,14 +13,14 @@ data class PPG(
     val sensorName: String,
     val sensorValue: Float,
     val accuracy: Int,
-    val timestamp: Long,
+    val ldt: LocalDateTime,
 ) : Parcelable {
     constructor(
         sensorName: String,
         sensorValue: Float,
         accuracy: Int,
-        timestamp: Long
-    ) : this(null, sensorName, sensorValue, accuracy, timestamp)
+        ldt: LocalDateTime
+    ) : this(null, sensorName, sensorValue, accuracy, ldt)
 
     companion object {
         const val HEART_RATE_PPG_RAW_DATA = "Heart Rate PPG Raw Data"

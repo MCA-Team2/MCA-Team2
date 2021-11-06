@@ -17,7 +17,7 @@ class LogActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         binding.apply {
-            adapter = SensorTypeAdapter()
+            adapter = SensorTypeAdapter(logViewModel)
             vm = logViewModel
             lifecycleOwner = this@LogActivity
         }

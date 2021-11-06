@@ -2,7 +2,6 @@ package com.jwpyo.soundmind.view.main
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -23,6 +22,7 @@ import com.jwpyo.soundmind.utils.SoundRecorder
 import kotlinx.coroutines.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.threeten.bp.LocalDateTime
 
 class MainActivity :
     BaseActivity(),
@@ -106,7 +106,7 @@ class MainActivity :
         val ppg = event.run {
             val sensorValue = values?.get(0) ?: return@run null
             if (sensorValue < 0) return@run null
-            PPG(sensorValue, accuracy, timestamp)
+            PPG(sensorValue, accuracy, LocalDateTime.now())
         } ?: return
 
         val ppgList = (ppgStorageMap[sensorName] ?: emptyList()) + ppg
@@ -114,8 +114,8 @@ class MainActivity :
         if (ppgList.size >= PPG_CHUNK_SIZE) {
             val sensorValue = ppgList.map { it.sensorValue }.toFloatArray()
             val accuracy = ppgList.map { it.accuracy.toLong() }.toLongArray()
-            val timestamp = ppgList.map { it.timestamp }.toLongArray()
-            mainViewModel.sendPPG(sensorName, sensorValue, accuracy, timestamp)
+            val ldt = ppgList.map { it.ldt.toString() }.toTypedArray()
+            mainViewModel.sendPPG(sensorName, sensorValue, accuracy, ldt)
             ppgStorageMap[sensorName] = emptyList()
         } else {
             ppgStorageMap[sensorName] = ppgList

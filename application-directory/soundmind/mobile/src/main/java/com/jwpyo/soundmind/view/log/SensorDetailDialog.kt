@@ -24,23 +24,22 @@ import com.jwpyo.soundmind.utils.PermissionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.io.File
 import java.io.FileWriter
 
 
 class SensorDetailDialog(
+    private val viewModel: LogViewModel,
     private val sensorName: String? = null,
 ) : DatabindingDialog() {
     private lateinit var binding: DialogSensorDetailBinding
-    private val viewModel: LogViewModel by sharedViewModel()
 
     private val permissionManager by lazy { PermissionManager(requireActivity()) }
 
     private val sensorLiveData: LiveData<List<PPG>> = viewModel.ppgList.map { ppgAllList ->
         ppgAllList
             .filter { it.sensorName == sensorName }
-            .sortedBy { it.timestamp }
+            .sortedBy { it.ldt }
     }
 
     override fun onCreateView(
@@ -79,7 +78,7 @@ class SensorDetailDialog(
                 CoroutineScope(Dispatchers.IO).launch {
                     val ctx = requireContext()
                     val uri = generateDataFrame(sensorLiveData.value!!) {
-                        "${it.timestamp}, ${it.sensorValue}, ${it.accuracy}"
+                        "${it.ldt}, ${it.sensorValue}, ${it.accuracy}"
                     }
                     val shareIntent: Intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"

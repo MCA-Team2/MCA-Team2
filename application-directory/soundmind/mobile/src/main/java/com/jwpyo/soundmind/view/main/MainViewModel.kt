@@ -21,7 +21,7 @@ class MainViewModel(
     private val ppgRepository: PPGRepository,
 ) : ViewModel() {
     val historyDate: MutableLiveData<LocalDate> = MutableLiveData(LocalDate.now())
-    val heartRatePPGRawData : LiveData<List<PPG>>
+    val heartRatePPGRawData: LiveData<List<PPG>>
 
     fun insertVoice(asset: Asset, startLDT: LocalDateTime, endLDT: LocalDateTime) {
         viewModelScope.launch {

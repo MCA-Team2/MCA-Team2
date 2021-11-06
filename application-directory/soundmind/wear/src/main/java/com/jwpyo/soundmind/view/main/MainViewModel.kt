@@ -41,17 +41,17 @@ class MainViewModel(
         sensorName: String,
         sensorValue: FloatArray,
         accuracy: LongArray,
-        timestamp: LongArray,
+        ldt: Array<String>,
     ): Task<DataItem> {
-        if (sensorValue.size != accuracy.size || sensorValue.size != timestamp.size)
-            throw Exception("sizes are inappropriate : ${sensorValue.size}, ${accuracy.size}, ${timestamp.size}")
+        if (sensorValue.size != accuracy.size || sensorValue.size != ldt.size)
+            throw Exception("sizes are inappropriate : ${sensorValue.size}, ${accuracy.size}, ${ldt.size}")
 
         val putDataMapRequest = PutDataMapRequest.create(
             Constant.PPG_PATH.format(sensorName)
         ).apply {
             dataMap.putFloatArray(Constant.SENSOR_VALUE_KEY, sensorValue)
             dataMap.putLongArray(Constant.ACCURACY_KEY, accuracy)
-            dataMap.putLongArray(Constant.TIME_STAMP_KEY, timestamp)
+            dataMap.putStringArray(Constant.TIME_STAMP_KEY, ldt)
         }
 
         val request = putDataMapRequest.asPutDataRequest().apply {

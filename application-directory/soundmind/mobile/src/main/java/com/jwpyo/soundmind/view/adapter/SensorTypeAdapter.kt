@@ -4,13 +4,14 @@ import android.content.res.Resources
 import android.view.View
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.view.log.LogViewModel
-import com.jwpyo.soundmind.view.main.MainViewModel
 import com.jwpyo.soundmind.view.viewholder.SensorTypeViewHolder
 import com.skydoves.baserecyclerviewadapter.BaseAdapter
 import com.skydoves.baserecyclerviewadapter.BaseViewHolder
 import com.skydoves.baserecyclerviewadapter.SectionRow
 
-class SensorTypeAdapter() : BaseAdapter() {
+class SensorTypeAdapter(
+    private val viewModel : LogViewModel
+) : BaseAdapter() {
     init {
         addSection(arrayListOf<Any>())
     }
@@ -27,7 +28,7 @@ class SensorTypeAdapter() : BaseAdapter() {
 
     override fun viewHolder(layout: Int, view: View): BaseViewHolder {
         when (layout) {
-            R.layout.item_sensor_type -> return SensorTypeViewHolder(view)
+            R.layout.item_sensor_type -> return SensorTypeViewHolder(viewModel, view)
             else -> throw Resources.NotFoundException("not founded layout")
         }
 
