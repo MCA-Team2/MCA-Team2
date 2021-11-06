@@ -7,7 +7,8 @@ import android.os.IBinder
 import android.util.Log
 import com.google.android.gms.wearable.*
 import com.jwpyo.soundmind.R
-import com.jwpyo.soundmind.model.ppg.PPG
+import com.jwpyo.soundmind.model.ui.PPG
+import com.jwpyo.soundmind.model.ui.PPG.Companion.HEART_RATE_PPG_RAW_DATA
 import com.jwpyo.soundmind.utils.Constant.ACCURACY_KEY
 import com.jwpyo.soundmind.utils.Constant.AUDIO_KEY
 import com.jwpyo.soundmind.utils.Constant.AUDIO_PATH
@@ -16,6 +17,7 @@ import com.jwpyo.soundmind.utils.Constant.PPG_PATH_PREFIX
 import com.jwpyo.soundmind.utils.Constant.SENSOR_VALUE_KEY
 import com.jwpyo.soundmind.utils.Constant.START_TIME_KEY
 import com.jwpyo.soundmind.utils.Constant.TIME_STAMP_KEY
+import com.jwpyo.soundmind.utils.PPGConverter
 import com.jwpyo.soundmind.view.main.MainViewModel
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinComponent
@@ -23,7 +25,9 @@ import org.koin.core.component.get
 import org.threeten.bp.LocalDateTime
 
 class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
-    val mainViewModel: MainViewModel = get()
+    private val mainViewModel: MainViewModel = get()
+    private val ppgConverter: PPGConverter = get()
+    private val ppgCache: MutableList<PPG> = mutableListOf()
     var job: Job? = null
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -117,10 +121,23 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
             val ldt = dataMapItem.dataMap.getStringArray(TIME_STAMP_KEY)!!
                 .map { LocalDateTime.parse(it) }
 
-            val ppgList = sensorValue.indices.map { i ->
-                PPG(sensorName, sensorValue[i], accuracy[i].toInt(), ldt[i])
+            if (sensorName == HEART_RATE_PPG_RAW_DATA) {
+                val ppgList = sensorValue.indices.map { i ->
+                    PPG(sensorName, sensorValue[i], accuracy[i].toInt(), ldt[i])
+                }
+                ppgCache.addAll(ppgList)
+                Log.e("hello", "hello ${ppgCache.size}")
+
+                runCatching {
+                    val stress = ppgConverter.getStress(ppgList.toTypedArray())
+                    if (stress != null) mainViewModel.insertStress(stress)
+                }.onSuccess {
+                    Log.e("hello", "hello success!!!")
+                    ppgCache.clear()
+                }.onFailure {
+                    Log.e("hello", "hello error $it")
+                }
             }
-            mainViewModel.insertPPG(ppgList)
         }.onFailure {
             Log.e("hello", "error: $it")
         }

@@ -5,7 +5,6 @@ import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.BaseActivity
 import com.jwpyo.soundmind.databinding.ActivityLogBinding
 import com.jwpyo.soundmind.extensions.show
-import com.jwpyo.soundmind.view.adapter.SensorTypeAdapter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class LogActivity : BaseActivity() {
@@ -17,7 +16,6 @@ class LogActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         binding.apply {
-            adapter = SensorTypeAdapter(logViewModel)
             vm = logViewModel
             lifecycleOwner = this@LogActivity
         }

@@ -4,14 +4,11 @@ import androidx.lifecycle.*
 import com.google.android.gms.wearable.Asset
 import com.google.android.gms.wearable.DataClient
 import com.jwpyo.soundmind.extensions.getByteArrayFromAsset
-import com.jwpyo.soundmind.model.ppg.PPG
-import com.jwpyo.soundmind.model.ppg.PPG.Companion.HEART_RATE_PPG_RAW_DATA
-import com.jwpyo.soundmind.model.ui.StressItem
+import com.jwpyo.soundmind.model.stress.Stress
 import com.jwpyo.soundmind.model.voice.Voice
-import com.jwpyo.soundmind.repository.PPGRepository
+import com.jwpyo.soundmind.repository.StressRepository
 import com.jwpyo.soundmind.repository.VoiceRepository
 import com.jwpyo.soundmind.utils.PPGConverter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDate
@@ -22,13 +19,11 @@ class MainViewModel(
     private val dataClient: DataClient,
     private val ppgConverter: PPGConverter,
     private val voiceRepository: VoiceRepository,
-    private val ppgRepository: PPGRepository,
+    private val stressRepository: StressRepository,
 ) : ViewModel() {
-    val ppgLiveData: LiveData<List<PPG>>
-
     val historyDate: Flow<LocalDate>
-    val ppg: Flow<List<PPG>>
-    val stress: Flow<List<StressItem>>
+    val volume: Flow<List<Float>>
+    val stress: Flow<Flow<List<Stress>>>
 
     val historyDateLiveData: MutableLiveData<LocalDate> = MutableLiveData(LocalDate.now())
 
@@ -40,26 +35,19 @@ class MainViewModel(
         }
     }
 
-    fun insertPPG(ppgList: List<PPG>) {
+    fun insertStress(stress: Stress) {
         viewModelScope.launch {
-            ppgRepository.insertPPG(ppgList)
+            stressRepository.insertStress(stress)
         }
     }
 
     init {
         historyDate = historyDateLiveData.asFlow()
 
-        ppg = combine(
-            ppgRepository.getPPGs(), historyDate
-        ) { ppgList, date ->
-            ppgList.filter { it.sensorName == HEART_RATE_PPG_RAW_DATA && it.ldt.toLocalDate() == date }
+        volume = emptyFlow()
+
+        stress = historyDate.map { date ->
+            stressRepository.getStresses(date)
         }
-
-        stress = ppg
-            .map { ppgList -> ppgConverter.getStressList(ppgList.toTypedArray()) }
-            .flowOn(Dispatchers.IO)
-            .catch { emit(listOf()) }
-
-        ppgLiveData = ppg.asLiveData()
     }
 }

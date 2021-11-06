@@ -1,58 +1,31 @@
 package com.jwpyo.soundmind.utils
 
+import android.util.Log
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
-import com.jwpyo.soundmind.model.ppg.PPG
-import com.jwpyo.soundmind.model.ui.StressItem
+import com.jwpyo.soundmind.model.stress.Stress
+import com.jwpyo.soundmind.model.ui.PPG
 import org.jtransforms.fft.DoubleFFT_1D
-import org.threeten.bp.Duration
-import org.threeten.bp.LocalDateTime
 import uk.me.berndporr.iirj.Butterworth
 
 class PPGConverter {
 
-    fun getStressList(ppgList: Array<PPG>): List<StressItem> {
-        if (ppgList.isEmpty()) return listOf()
+    fun getStress(ppgList: Array<PPG>): Stress? {
+        if (ppgList.isEmpty()) return null
 
-        val date = ppgList.first().ldt.toLocalDate()
-        val step = Duration.ofSeconds(ANALYSIS_INTERVAL)
-        var headLDT = date.atStartOfDay()
-        var i = 0
-        val result = mutableListOf<StressItem>()
-
-        while ((headLDT + step).toLocalDate() == date) {
-            val scopedPPGList = mutableListOf<PPG>()
-            while (i < ppgList.size &&
-                ppgList[i].ldt.let { it.isAfter(headLDT) and it.isBefore(headLDT + step) }
-            ) {
-                scopedPPGList.add(ppgList[i])
-                i += 1
-            }
-
-            // TODO: if exist, do not calculate! just do reload it
-            // TODO: save stress data
-
-            if (scopedPPGList.size > REQUIRE_SAMPLE_NUMBER)
-                result.add(getStress(headLDT, scopedPPGList))
-            headLDT += step
-        }
-        return result
-    }
-
-    private fun getStress(targetLDT: LocalDateTime, ppgList: List<PPG>): StressItem {
-        return StressItem(
-            targetLDT,
-            analyzeRR(
-                analyzePPG(
-                    ppgList.map { ppg -> ppg.sensorValue.toDouble() }.toMutableList()
-                )
-            ).toFloat()
-        )
+        val ldt = ppgList.maxOf { it.ldt }
+        val stressValue = analyzeRR(
+            analyzePPG(
+                ppgList.map { ppg -> ppg.sensorValue.toDouble() }.toMutableList()
+            )
+        ).toFloat()
+        return Stress(ldt, stressValue)
     }
 
     private fun analyzePPG(ppgRaw: MutableList<Double>): MutableList<Double> {
         val samplingFrequency: Double = ppgRaw.size / ANALYSIS_INTERVAL.toDouble()
+        Log.e("hello", "hello ppgsize = ${ppgRaw.size} / sf = $samplingFrequency")
         val ppgFiltered = mutableListOf<Double>()
         ppgFiltered.addAll(ppgRaw)
 

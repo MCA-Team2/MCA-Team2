@@ -163,9 +163,4 @@ class MainActivity :
     private fun stopRecord() {
         recordingJob?.cancel()
     }
-
-    companion object {
-        const val HEART_RATE_HD_PPG_RAW = "Heart Rate HD PPG Raw Data"
-        const val HEART_RATE_PPG_RAW = "Heart Rate PPG Raw Data"
-    }
 }
