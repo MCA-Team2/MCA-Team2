@@ -104,18 +104,10 @@ constructor(
     }
 
     companion object {
-        const val WIDTH_PER_HOUR = 300
+        const val WIDTH_PER_HOUR = 500
 
         val defaultInfo: List<Stress> = listOf(
-            Stress(LocalDateTime.now().toLocalDate().atTime(9, 50), 0.2f),
-            Stress(LocalDateTime.now().toLocalDate().atTime(9, 55), 0.75f),
-            Stress(LocalDateTime.now().toLocalDate().atTime(10, 0), 0.6f),
-            Stress(LocalDateTime.now().toLocalDate().atTime(10, 5), 1.5f),
-            Stress(LocalDateTime.now().toLocalDate().atTime(10, 10), 2.2f),
-            Stress(LocalDateTime.now().toLocalDate().atTime(10, 15), 3.5f),
-            Stress(LocalDateTime.now().toLocalDate().atTime(10, 20), 4.9f),
-            Stress(LocalDateTime.now().toLocalDate().atTime(10, 25), 3.5f),
-            Stress(LocalDateTime.now().toLocalDate().atTime(10, 30), 2.2f),
+            Stress(LocalDateTime.now(),0.5f),
         )
     }
 }
