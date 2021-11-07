@@ -11,7 +11,7 @@ import kotlin.math.log2
 @Entity
 @Parcelize
 data class Stress(
-    @PrimaryKey(autoGenerate = true) val id: Long?,
+    @PrimaryKey(autoGenerate = true) var id: Long?,
     val ldt: LocalDateTime,
     val value: Float,
 ) : Parcelable {

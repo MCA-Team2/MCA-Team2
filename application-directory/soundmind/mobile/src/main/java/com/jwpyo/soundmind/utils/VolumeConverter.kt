@@ -19,16 +19,5 @@ fun convertToShortArray(byteArray: ByteArray): ShortArray {
 
 fun getVolume(byteArray: ByteArray): Float {
     val rms = sqrt(convertToShortArray(byteArray).map { short -> short * short }.average())
-    val dB = log2(rms.toFloat())
-    return (dB.clamp(10f, 15f) - 10f) / 5
-}
-
-fun getVolumeItems(voiceList: List<Voice>): List<VolumeItem> {
-    return voiceList.map {
-        val startLDT = it.startLDT
-        val endLDT = it.endLDT
-        val value = getVolume(it.array)
-
-        VolumeItem(startLDT, endLDT, value)
-    }
+    return log2(rms.toFloat())
 }

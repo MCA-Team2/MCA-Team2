@@ -8,8 +8,8 @@ import org.threeten.bp.LocalDate
 class StressRepositoryImpl(
     private val stressDao: StressDao
 ) : StressRepository {
-    override fun insertStress(stress: Stress) {
-        stressDao.insert(stress)
+    override fun insertStress(stress: Stress): Long {
+        return stressDao.insert(stress)
     }
 
     override fun getStresses(date: LocalDate): Flow<List<Stress>> {

@@ -47,10 +47,8 @@ class MainViewModel(
         }
     }
 
-    fun insertStress(stress: Stress) {
-        viewModelScope.launch {
-            stressRepository.insertStress(stress)
-        }
+    fun insertStress(stress: Stress): Long {
+        return stressRepository.insertStress(stress)
     }
 
     init {

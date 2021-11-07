@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.RectF
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.Log
@@ -33,7 +32,7 @@ constructor(
 
     private val linePaint = Paint().apply {
         color = ContextCompat.getColor(context, R.color.audio)
-        strokeWidth = 1f
+        strokeWidth = WIDTH_PER_HOUR * 0.004f
         style = Paint.Style.STROKE
     }
 
@@ -88,7 +87,7 @@ constructor(
             }
 
             source?.forEach {
-                if (it.value == null) return@forEach
+                if (it.y == null) return@forEach
 
                 val l = Duration.between(
                     LocalTime.of(x1, 0),
@@ -99,8 +98,8 @@ constructor(
                     it.endLDT.toLocalTime()
                 ).toMinutes().toFloat() / 60 * WIDTH_PER_HOUR
 
-                val vol = it.value * unitMaxHeight
-                drawLine((l+r) / 2, h / 2 - vol / 2, (l+r) / 2, h / 2 + vol / 2, linePaint)
+                val vol = it.y!! * unitMaxHeight
+                drawLine((l + r) / 2, h / 2 - vol / 2, (l + r) / 2, h / 2 + vol / 2, linePaint)
             }
         }
     }
@@ -110,39 +109,14 @@ constructor(
     }
 
     companion object {
-        const val WIDTH_PER_HOUR = 300
+        const val WIDTH_PER_HOUR = 1000
 
         val defaultInfo: List<VolumeItem> = listOf(
             VolumeItem(
-                LocalDateTime.now().toLocalDate().atTime(9, 0),
-                LocalDateTime.now().toLocalDate().atTime(9, 5),
+                LocalDateTime.now(),
+                LocalDateTime.now().minusMinutes(5),
                 0.5f
-            ),
-            VolumeItem(
-                LocalDateTime.now().toLocalDate().atTime(9, 5),
-                LocalDateTime.now().toLocalDate().atTime(9, 10),
-                0.1f
-            ),
-            VolumeItem(
-                LocalDateTime.now().toLocalDate().atTime(9, 10),
-                LocalDateTime.now().toLocalDate().atTime(9, 15),
-                0.2f
-            ),
-            VolumeItem(
-                LocalDateTime.now().toLocalDate().atTime(9, 15),
-                LocalDateTime.now().toLocalDate().atTime(9, 20),
-                0.8f
-            ),
-            VolumeItem(
-                LocalDateTime.now().toLocalDate().atTime(9, 20),
-                LocalDateTime.now().toLocalDate().atTime(9, 25),
-                0.9f
-            ),
-            VolumeItem(
-                LocalDateTime.now().toLocalDate().atTime(9, 25),
-                LocalDateTime.now().toLocalDate().atTime(9, 30),
-                0.5f
-            ),
+            )
         )
     }
 }

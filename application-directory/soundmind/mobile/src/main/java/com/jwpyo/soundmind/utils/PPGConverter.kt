@@ -268,7 +268,7 @@ class PPGConverter {
     }
 
     companion object {
-        const val REQUIRE_SAMPLE_NUMBER: Int = 10000
+        const val REQUIRE_SAMPLE_NUMBER: Int = 50000
         const val ANALYSIS_INTERVAL: Long = 300L // in seconds
         const val CENTER_FREQUENCY: Double = 2.1 // Hz
         const val WIDTH_FREQUENCY: Double = 2.8 // Hz
