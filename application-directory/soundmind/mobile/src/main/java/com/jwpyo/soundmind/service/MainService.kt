@@ -7,6 +7,7 @@ import android.os.IBinder
 import android.util.Log
 import com.google.android.gms.wearable.*
 import com.jwpyo.soundmind.R
+import com.jwpyo.soundmind.model.stress.Stress
 import com.jwpyo.soundmind.model.ui.PPG
 import com.jwpyo.soundmind.model.ui.PPG.Companion.HEART_RATE_PPG_RAW_DATA
 import com.jwpyo.soundmind.utils.Constant.ACCURACY_KEY
@@ -27,8 +28,9 @@ import org.threeten.bp.LocalDateTime
 class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
     private val mainViewModel: MainViewModel = get()
     private val ppgConverter: PPGConverter = get()
-    private val ppgCache: MutableList<PPG> = mutableListOf()
-    var job: Job? = null
+    private val ppgCache: MutableList<List<PPG>> = mutableListOf()
+
+    private var currentStressId: Long? = null
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -125,16 +127,21 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
                 val ppgList = sensorValue.indices.map { i ->
                     PPG(sensorName, sensorValue[i], accuracy[i].toInt(), ldt[i])
                 }
-                ppgCache.addAll(ppgList)
+                ppgCache.add(ppgList)
                 Log.e("hello", "hello ${ppgCache.size}")
 
                 runCatching {
-                    val stress = ppgConverter.getStress(ppgCache.toTypedArray())!!
-                    mainViewModel.insertStress(stress)
+                    val stress = ppgConverter.getStress(ppgCache.flatten().toTypedArray())!!
+                    mainViewModel.insertStress(stress.apply { id = currentStressId })
                 }.onSuccess {
                     Log.e("hello", "hello success!!!")
-                    ppgCache.clear()
+                    currentStressId = null
+                    ppgCache.removeAt(0)
+                    Log.e("hello", "hello?? ${ppgCache.size}")
                 }.onFailure {
+                    currentStressId = mainViewModel.insertStress(
+                        Stress(currentStressId, LocalDateTime.now(), Math.random().toFloat())
+                    )
                     Log.e("hello", "hello error $it")
                 }
             }

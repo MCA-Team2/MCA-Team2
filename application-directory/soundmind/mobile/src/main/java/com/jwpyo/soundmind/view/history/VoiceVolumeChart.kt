@@ -87,7 +87,7 @@ constructor(
             }
 
             source?.forEach {
-                if (it.value == null) return@forEach
+                if (it.y == null) return@forEach
 
                 val l = Duration.between(
                     LocalTime.of(x1, 0),
@@ -98,7 +98,7 @@ constructor(
                     it.endLDT.toLocalTime()
                 ).toMinutes().toFloat() / 60 * WIDTH_PER_HOUR
 
-                val vol = it.value * unitMaxHeight
+                val vol = it.y!! * unitMaxHeight
                 drawLine((l + r) / 2, h / 2 - vol / 2, (l + r) / 2, h / 2 + vol / 2, linePaint)
             }
         }
@@ -109,7 +109,7 @@ constructor(
     }
 
     companion object {
-        const val WIDTH_PER_HOUR = 500
+        const val WIDTH_PER_HOUR = 1000
 
         val defaultInfo: List<VolumeItem> = listOf(
             VolumeItem(

@@ -38,7 +38,7 @@ constructor(
     private var source: List<Stress>? = null
     private var x1: Int = 0
     private var x2: Int = 24
-    private var dotRadius: Float = 5f
+    private var dotRadius: Float = 2f
 
     fun setData(_source: List<Stress>) {
         if (_source.isEmpty()) return
@@ -104,7 +104,7 @@ constructor(
     }
 
     companion object {
-        const val WIDTH_PER_HOUR = 500
+        const val WIDTH_PER_HOUR = 1000
 
         val defaultInfo: List<Stress> = listOf(
             Stress(LocalDateTime.now(),0.5f),
