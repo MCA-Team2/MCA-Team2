@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.Log
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.model.stress.Stress
+import com.jwpyo.soundmind.utils.Constant.WIDTH_PER_HOUR
 import org.threeten.bp.LocalDateTime
 
 class StressLineChart @JvmOverloads
@@ -49,7 +49,7 @@ constructor(
 
     fun setScope(left: Int, right: Int) {
         layoutParams = layoutParams.apply {
-            width = VoiceVolumeChart.WIDTH_PER_HOUR * (right - left)
+            width = WIDTH_PER_HOUR * (right - left)
         }
         x1 = left
         x2 = right
@@ -104,10 +104,8 @@ constructor(
     }
 
     companion object {
-        const val WIDTH_PER_HOUR = 1000
-
         val defaultInfo: List<Stress> = listOf(
-            Stress(LocalDateTime.now(),0.5f),
+            Stress(LocalDateTime.now(), 0.5f),
         )
     }
 }

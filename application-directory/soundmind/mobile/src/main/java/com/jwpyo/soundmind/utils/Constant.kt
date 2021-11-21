@@ -19,4 +19,6 @@ object Constant {
     const val TIME_STAMP_KEY = "time-stamp"
 
     const val REQUEST_PERMISSION_CODE = 2
+
+    const val WIDTH_PER_HOUR = 1000
 }
