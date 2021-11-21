@@ -1,10 +1,16 @@
 package com.jwpyo.soundmind.service
 
+// android.speech 클래스에서 필요한 객체 임포트
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.os.IBinder
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
+import android.widget.Toast
 import com.google.android.gms.wearable.*
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.model.stress.Stress
@@ -20,7 +26,6 @@ import com.jwpyo.soundmind.utils.Constant.START_TIME_KEY
 import com.jwpyo.soundmind.utils.Constant.TIME_STAMP_KEY
 import com.jwpyo.soundmind.utils.PPGConverter
 import com.jwpyo.soundmind.view.main.MainViewModel
-import kotlinx.coroutines.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 import org.threeten.bp.LocalDateTime
@@ -31,6 +36,10 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
     private val ppgCache: MutableList<List<PPG>> = mutableListOf()
 
     private var currentStressId: Long? = null
+
+    // Parameters for STT
+    private lateinit var intent: Intent
+    private var mRecognizer: SpeechRecognizer? = null
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -63,14 +72,15 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
 
         startForeground(ONGOING_NOTIFICATION_ID, notification)
 
+        startSTT()
         startRecording()
 
         return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
+        stopSTT()
         stopRecording()
-
         super.onDestroy()
     }
 
@@ -92,12 +102,72 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
             }
     }
 
+
+    private val listener: RecognitionListener = object : RecognitionListener {
+        override fun onReadyForSpeech(params: Bundle) {
+            Toast.makeText(applicationContext, "음성인식을 시작합니다.", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onBeginningOfSpeech() {}
+        override fun onRmsChanged(rmsdB: Float) {}
+        override fun onBufferReceived(buffer: ByteArray) {}
+        override fun onEndOfSpeech() {}
+        override fun onError(error: Int) {
+            val message: String
+            message = when (error) {
+                SpeechRecognizer.ERROR_AUDIO -> "오디오 에러"
+                SpeechRecognizer.ERROR_CLIENT -> "클라이언트 에러"
+                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "퍼미션 없음"
+                SpeechRecognizer.ERROR_NETWORK -> "네트워크 에러"
+                SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "네트웍 타임아웃"
+                SpeechRecognizer.ERROR_NO_MATCH -> "찾을 수 없음"
+                SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RECOGNIZER가 바쁨"
+                SpeechRecognizer.ERROR_SERVER -> "서버가 이상함"
+                SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "말하는 시간초과"
+                else -> "알 수 없는 오류임"
+            }
+            Toast.makeText(applicationContext, "에러가 발생하였습니다. : $message", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onResults(results: Bundle) {
+            // 말을 하면 ArrayList에 단어를 넣고 textView에 단어를 이어줍니다.
+            val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+            Log.d("STT", "STT working")
+            for (i in matches!!.indices) {
+                Log.d("STT", "STT: " + matches[i])
+            }
+        }
+
+        override fun onPartialResults(partialResults: Bundle) {}
+        override fun onEvent(eventType: Int, params: Bundle) {}
+    }
+
+    private fun startSTT(){
+        Log.d("STT", "STT started")
+        intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,getPackageName())
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,"ko-KR")
+        mRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        mRecognizer?.setRecognitionListener(listener)
+        mRecognizer?.startListening(intent)
+    }
+
+    private fun stopSTT() {
+        if (mRecognizer != null) {
+            mRecognizer?.destroy()
+            mRecognizer?.cancel()
+            mRecognizer = null
+        }
+    }
+
     private fun startRecording() {
         Wearable.getDataClient(this).addListener(this)
+
     }
 
     private fun stopRecording() {
         Wearable.getDataClient(this).removeListener(this)
+
     }
 
     private fun onAudioChangedEvent(dataEvent: DataEvent) =
@@ -162,4 +232,7 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
             }
         }
     }
+
+
+
 }
