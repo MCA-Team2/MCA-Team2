@@ -1,11 +1,11 @@
 package com.jwpyo.soundmind.extensions
 
 import android.graphics.Rect
-import android.util.Log
 import android.view.MotionEvent
 import android.view.TouchDelegate
 import android.view.View
 import android.view.ViewGroup
+import android.widget.HorizontalScrollView
 import androidx.lifecycle.MutableLiveData
 import com.jwpyo.soundmind.utils.Constant.WIDTH_PER_HOUR
 import org.threeten.bp.LocalTime
@@ -17,6 +17,7 @@ data class TouchState(
 )
 
 fun View.setHorizontalDragListenerOnHolder(
+    scrollView: HorizontalScrollView,
     lineView: View,
     stickyDirection: StickyDirection,
     step: Float,
@@ -25,6 +26,7 @@ fun View.setHorizontalDragListenerOnHolder(
 ) {
     val CLICK_DRAG_TOLERANCE = 10f
 
+    var scrollViewScrollX = 0f
     var downRawX = 0f
     var downRawY = 0f
     var dX = 0f
@@ -35,8 +37,8 @@ fun View.setHorizontalDragListenerOnHolder(
         val action = motionEvent.action
 
         if (action == MotionEvent.ACTION_DOWN) {
-            Log.e("hello", "hello-child-down")
             touchStateLiveData.value = TouchState(true)
+            scrollViewScrollX = scrollView.scrollX.toFloat()
             downRawX = motionEvent.rawX
             downRawY = motionEvent.rawY
             dX = view.x - downRawX
@@ -44,12 +46,11 @@ fun View.setHorizontalDragListenerOnHolder(
 
             true // Consumed
         } else if (action == MotionEvent.ACTION_MOVE) {
-            Log.e("hello", "hello-child-move")
             val viewWidth = view.width
             val viewParent = view.parent as View
             val parentWidth = viewParent.width
 
-            var newX = motionEvent.rawX + dX
+            var newX = motionEvent.rawX + dX + scrollView.scrollX.toFloat() - scrollViewScrollX
             newX = Math.max(
                 layoutParams.leftMargin.toFloat(),
                 newX
@@ -64,7 +65,7 @@ fun View.setHorizontalDragListenerOnHolder(
             val minutes = (newX / WIDTH_PER_HOUR).roundToInt()
             xLiveData.postValue(LocalTime.of(minutes / 60, minutes % 60))
 
-            when(stickyDirection) {
+            when (stickyDirection) {
                 StickyDirection.LEFT -> {
                     lineView.animate()
                         .x(newX)
@@ -91,7 +92,6 @@ fun View.setHorizontalDragListenerOnHolder(
                 .start()
             true // Consumed
         } else if (action == MotionEvent.ACTION_UP) {
-            Log.e("hello", "hello-child-up")
             touchStateLiveData.value = TouchState(false)
             val upRawX = motionEvent.rawX
             val upRawY = motionEvent.rawY

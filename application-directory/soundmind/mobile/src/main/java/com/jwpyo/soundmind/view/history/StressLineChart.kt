@@ -59,7 +59,6 @@ constructor(
 
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
-        Log.e("hello", "hello voice chart on draw")
         super.onDraw(canvas)
         if (source == null) return
 

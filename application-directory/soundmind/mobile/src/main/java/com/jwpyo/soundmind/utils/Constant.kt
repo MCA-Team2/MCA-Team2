@@ -20,5 +20,5 @@ object Constant {
 
     const val REQUEST_PERMISSION_CODE = 2
 
-    const val WIDTH_PER_HOUR = 1000
+    const val WIDTH_PER_HOUR = 2000
 }

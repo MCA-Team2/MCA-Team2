@@ -68,6 +68,13 @@ class HistoryFragment : DatabindingFragment() {
         binding.chartScrollView.setOnTouchListener { _, event ->
             when (event.action) {
                 ACTION_MOVE -> {
+                    if (event.x > binding.chartScrollView.width * 0.9f) {
+                        binding.chartScrollView.smoothScrollBy(20, 0)
+                    }
+                    if (event.x < binding.chartScrollView.width * 0.1f) {
+                        binding.chartScrollView.smoothScrollBy(-20, 0)
+                    }
+
                     when {
                         startHolderTouchState.value?.isFocused == true -> {
                             binding.startLineHolder.dispatchTouchEvent(event)
@@ -100,6 +107,7 @@ class HistoryFragment : DatabindingFragment() {
         }
 
         binding.startLineHolder.setHorizontalDragListenerOnHolder(
+            binding.chartScrollView,
             binding.startLine,
             StickyDirection.LEFT,
             WIDTH_PER_HOUR / 60f,
@@ -108,6 +116,7 @@ class HistoryFragment : DatabindingFragment() {
         )
 
         binding.endLineHolder.setHorizontalDragListenerOnHolder(
+            binding.chartScrollView,
             binding.endLine,
             StickyDirection.RIGHT,
             WIDTH_PER_HOUR / 60f,
