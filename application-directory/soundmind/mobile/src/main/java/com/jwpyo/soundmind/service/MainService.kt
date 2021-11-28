@@ -134,10 +134,8 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
                     val stress = ppgConverter.getStress(ppgCache.flatten().toTypedArray())!!
                     mainViewModel.insertStress(stress.apply { id = currentStressId })
                 }.onSuccess {
-                    Log.e("hello", "hello success!!!")
                     currentStressId = null
                     ppgCache.removeAt(0)
-                    Log.e("hello", "hello?? ${ppgCache.size}")
                 }.onFailure {
                     currentStressId = mainViewModel.insertStress(
                         Stress(currentStressId, LocalDateTime.now(), Math.random().toFloat())

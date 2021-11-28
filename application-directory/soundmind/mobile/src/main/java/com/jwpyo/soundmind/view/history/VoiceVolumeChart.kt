@@ -11,6 +11,7 @@ import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.model.ui.VolumeItem
+import com.jwpyo.soundmind.utils.Constant.WIDTH_PER_HOUR
 import org.threeten.bp.Duration
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.LocalTime
@@ -51,7 +52,7 @@ constructor(
 
     fun setScope(left: Int, right: Int) {
         layoutParams = layoutParams.apply {
-            width = VoiceVolumeChart.WIDTH_PER_HOUR * (right - left)
+            width = WIDTH_PER_HOUR * (right - left)
         }
         x1 = left
         x2 = right
@@ -61,7 +62,6 @@ constructor(
 
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
-        Log.e("hello", "hello voice chart on draw")
         super.onDraw(canvas)
         if (source == null) return
 
@@ -72,15 +72,15 @@ constructor(
         canvas?.apply {
             (x1..x2).forEach { x ->
                 drawLine(
-                    (x - x1).toFloat() * StressLineChart.WIDTH_PER_HOUR,
+                    (x - x1).toFloat() * WIDTH_PER_HOUR,
                     0f,
-                    (x - x1).toFloat() * StressLineChart.WIDTH_PER_HOUR,
+                    (x - x1).toFloat() * WIDTH_PER_HOUR,
                     h,
                     gridPaint
                 )
                 drawText(
                     "$x:00",
-                    (x - x1).toFloat() * StressLineChart.WIDTH_PER_HOUR,
+                    (x - x1).toFloat() * WIDTH_PER_HOUR,
                     h - textPaint.textSize,
                     textPaint
                 )
@@ -109,8 +109,6 @@ constructor(
     }
 
     companion object {
-        const val WIDTH_PER_HOUR = 1000
-
         val defaultInfo: List<VolumeItem> = listOf(
             VolumeItem(
                 LocalDateTime.now(),
