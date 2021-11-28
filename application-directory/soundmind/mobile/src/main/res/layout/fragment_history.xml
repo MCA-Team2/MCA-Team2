@@ -6,6 +6,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="vm"
             type="com.jwpyo.soundmind.view.history.HistoryViewModel" />
@@ -119,10 +121,10 @@
                 android:id="@+id/chart_scroll_view"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
+                android:background="@color/white"
                 android:fillViewport="true"
                 android:overScrollMode="never"
                 android:scrollbars="none"
-                android:background="@color/white"
                 app:layout_constraintBottom_toBottomOf="@id/guideline_graph_b"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/guideline_graph_t">
@@ -270,18 +272,32 @@
 
             </HorizontalScrollView>
 
+            <TextView
+                android:id="@+id/timestamp_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{vm.audioScopeRange}"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="@id/guideline_controller_b"
+                app:layout_constraintEnd_toStartOf="@id/play_button"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/guideline_controller_t"
+                tools:text="08:00 - 09:00" />
+
             <ImageView
-                android:id="@+id/play_pause_button"
+                android:id="@+id/play_button"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_margin="10dp"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/content_description_default"
                 android:src="@drawable/ic_baseline_play_arrow_24"
+                android:visibility="@{vm.audioIsPlaying ? View.INVISIBLE : View.VISIBLE}"
                 app:layout_constraintBottom_toBottomOf="@id/guideline_controller_b"
                 app:layout_constraintEnd_toStartOf="@id/stop_button"
                 app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@id/timestamp_text"
                 app:layout_constraintTop_toTopOf="@id/guideline_controller_t" />
 
             <ImageView
@@ -292,9 +308,10 @@
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/content_description_default"
                 android:src="@drawable/ic_baseline_stop_24"
+                android:visibility="@{vm.audioIsPlaying ? View.VISIBLE : View.INVISIBLE}"
                 app:layout_constraintBottom_toBottomOf="@id/guideline_controller_b"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/play_pause_button"
+                app:layout_constraintStart_toEndOf="@id/play_button"
                 app:layout_constraintTop_toTopOf="@id/guideline_controller_t" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -65,6 +65,14 @@ class HistoryFragment : DatabindingFragment() {
             DatePickerDialog(viewModel.historyDateLiveData).show(context)
         }
 
+        binding.playButton.setOnClickListener {
+            viewModel.play()
+        }
+
+        binding.stopButton.setOnClickListener {
+            viewModel.stop()
+        }
+
         binding.chartScrollView.setOnTouchListener { _, event ->
             when (event.action) {
                 ACTION_MOVE -> {
@@ -105,24 +113,6 @@ class HistoryFragment : DatabindingFragment() {
                 else -> false
             }
         }
-
-        binding.startLineHolder.setHorizontalDragListenerOnHolder(
-            binding.chartScrollView,
-            binding.startLine,
-            StickyDirection.LEFT,
-            WIDTH_PER_HOUR / 60f,
-            viewModel.audioStartPosition,
-            startHolderTouchState
-        )
-
-        binding.endLineHolder.setHorizontalDragListenerOnHolder(
-            binding.chartScrollView,
-            binding.endLine,
-            StickyDirection.RIGHT,
-            WIDTH_PER_HOUR / 60f,
-            viewModel.audioEndPosition,
-            endHolderTouchState
-        )
     }
 
     private fun setObservers() {
@@ -130,6 +120,26 @@ class HistoryFragment : DatabindingFragment() {
             Log.e("hello", "hello $min, $max")
             binding.volumeChart.setScope(min, max)
             binding.stressChart.setScope(min, max)
+
+            binding.startLineHolder.setHorizontalDragListenerOnHolder(
+                binding.chartScrollView,
+                binding.startLine,
+                StickyDirection.LEFT,
+                WIDTH_PER_HOUR / 60f,
+                min,
+                viewModel.audioStartPosition,
+                startHolderTouchState
+            )
+
+            binding.endLineHolder.setHorizontalDragListenerOnHolder(
+                binding.chartScrollView,
+                binding.endLine,
+                StickyDirection.RIGHT,
+                WIDTH_PER_HOUR / 60f,
+                min,
+                viewModel.audioEndPosition,
+                endHolderTouchState
+            )
         }
 
         viewModel.volume.asLiveData().observe(viewLifecycleOwner) { volumeListFlow ->
@@ -165,5 +175,7 @@ class HistoryFragment : DatabindingFragment() {
         viewModel.stressChartInfo.observe(viewLifecycleOwner) { stressInfo ->
             binding.stressChart.setData(stressInfo)
         }
+
+        viewModel.getAudioByteArrayLiveDate.observe(viewLifecycleOwner) { }
     }
 }

@@ -6,6 +6,7 @@ import android.view.TouchDelegate
 import android.view.View
 import android.view.ViewGroup
 import android.widget.HorizontalScrollView
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.jwpyo.soundmind.utils.Constant.WIDTH_PER_HOUR
 import org.threeten.bp.LocalTime
@@ -21,6 +22,7 @@ fun View.setHorizontalDragListenerOnHolder(
     lineView: View,
     stickyDirection: StickyDirection,
     step: Float,
+    offsetHour: Int,
     xLiveData: MutableLiveData<LocalTime>,
     touchStateLiveData: MutableLiveData<TouchState>,
 ) {
@@ -62,29 +64,21 @@ fun View.setHorizontalDragListenerOnHolder(
 
             newX = (newX / step).roundToInt() * step
 
-            val minutes = (newX / WIDTH_PER_HOUR).roundToInt()
-            xLiveData.postValue(LocalTime.of(minutes / 60, minutes % 60))
 
-            when (stickyDirection) {
-                StickyDirection.LEFT -> {
-                    lineView.animate()
-                        .x(newX)
-                        .setDuration(0)
-                        .start()
-                }
-                StickyDirection.RIGHT -> {
-                    lineView.animate()
-                        .x(newX + view.width)
-                        .setDuration(0)
-                        .start()
-                }
-                StickyDirection.CENTER -> {
-                    lineView.animate()
-                        .x(newX + view.width * 0.5f)
-                        .setDuration(0)
-                        .start()
-                }
+            val stickyX = when (stickyDirection) {
+                StickyDirection.LEFT -> newX
+                StickyDirection.RIGHT -> newX + view.width
+                StickyDirection.CENTER -> newX + view.width * 0.5f
             }
+            val minutes = (stickyX / WIDTH_PER_HOUR * 60).roundToInt()
+
+            lineView.animate().x(stickyX).setDuration(0).start()
+            xLiveData.postValue(
+                LocalTime.of(
+                    offsetHour + minutes / 60,
+                    minutes % 60
+                )
+            )
 
             view.animate()
                 .x(newX)

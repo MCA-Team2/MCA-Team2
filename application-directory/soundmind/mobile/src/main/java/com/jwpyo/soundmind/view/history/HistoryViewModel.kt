@@ -1,18 +1,23 @@
 package com.jwpyo.soundmind.view.history
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import com.google.android.gms.wearable.DataClient
+import android.util.Log
+import androidx.lifecycle.*
 import com.jwpyo.soundmind.model.stress.Stress
 import com.jwpyo.soundmind.model.ui.VolumeItem
 import com.jwpyo.soundmind.repository.StressRepository
 import com.jwpyo.soundmind.repository.VoiceRepository
+import com.jwpyo.soundmind.utils.SoundPlayer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalTime
+import org.threeten.bp.format.DateTimeFormatter
+import java.io.ByteArrayInputStream
 
 
 @Suppress("JoinDeclarationAndAssignment")
@@ -33,6 +38,35 @@ class HistoryViewModel(
     val audioStartPosition: MutableLiveData<LocalTime>
     val audioEndPosition: MutableLiveData<LocalTime>
     val currentPosition: MutableLiveData<LocalTime>
+    val audioIsPlaying: MutableLiveData<Boolean>
+    val audioScopeRange: LiveData<String>
+
+    val getAudioByteArrayLiveDate: LiveData<() -> ByteArray>
+
+    val soundPlayer: SoundPlayer = SoundPlayer()
+    var playingJob: Job? = null
+
+    fun play() {
+        audioIsPlaying.postValue(true)
+        playingJob = CoroutineScope(Dispatchers.IO).launch {
+            val byteArray = getAudioByteArrayLiveDate.value?.let { it() }
+            Log.e("hello", "hello $byteArray")
+            if (byteArray != null) {
+                val inputStream = ByteArrayInputStream(byteArray)
+                soundPlayer.play(inputStream)
+                stop()
+            }
+        }
+        playingJob?.invokeOnCompletion {
+            audioIsPlaying.postValue(false)
+        }
+    }
+
+    fun stop() {
+        audioIsPlaying.postValue(false)
+        playingJob?.cancel()
+        playingJob = null
+    }
 
     init {
         historyDate = historyDateLiveData.asFlow()
@@ -62,8 +96,32 @@ class HistoryViewModel(
             }
         }
 
-        audioStartPosition = MutableLiveData()
-        audioEndPosition = MutableLiveData()
+        val now = LocalTime.now()
+        audioStartPosition = MutableLiveData(now.minusMinutes(now.minute.toLong()))
+        audioEndPosition = MutableLiveData(now.minusMinutes(now.minute.toLong()).plusHours(1L))
         currentPosition = MutableLiveData()
+        audioIsPlaying = MutableLiveData(false)
+
+        audioScopeRange = combine(
+            audioStartPosition.asFlow(), audioEndPosition.asFlow()
+        ) { start, end ->
+            val sTime = start.format(DateTimeFormatter.ofPattern("HH:mm"))
+            val eTime = end.format(DateTimeFormatter.ofPattern("HH:mm"))
+            "$sTime - $eTime"
+        }.asLiveData()
+
+        getAudioByteArrayLiveDate = combine(
+            historyDate, audioStartPosition.asFlow(), audioEndPosition.asFlow()
+        ) { date, sTime, eTime ->
+            stop()
+            return@combine {
+                val voiceList = voiceRepository.getVoices(date.atTime(sTime), date.atTime(eTime))
+                var merged = ByteArray(0)
+                voiceList.onEach { voice ->
+                    merged += voice.array
+                }
+                merged
+            }
+        }.asLiveData()
     }
 }
