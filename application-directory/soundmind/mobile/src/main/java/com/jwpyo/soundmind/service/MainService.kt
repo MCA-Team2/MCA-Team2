@@ -72,14 +72,14 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
 
         startForeground(ONGOING_NOTIFICATION_ID, notification)
 
-        startSTT()
+//        startSTT()
         startRecording()
 
         return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
-        stopSTT()
+//        stopSTT()
         stopRecording()
         super.onDestroy()
     }
@@ -103,62 +103,62 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
     }
 
 
-    private val listener: RecognitionListener = object : RecognitionListener {
-        override fun onReadyForSpeech(params: Bundle) {
-            Toast.makeText(applicationContext, "음성인식을 시작합니다.", Toast.LENGTH_SHORT).show()
-        }
-
-        override fun onBeginningOfSpeech() {}
-        override fun onRmsChanged(rmsdB: Float) {}
-        override fun onBufferReceived(buffer: ByteArray) {}
-        override fun onEndOfSpeech() {}
-        override fun onError(error: Int) {
-            val message: String
-            message = when (error) {
-                SpeechRecognizer.ERROR_AUDIO -> "오디오 에러"
-                SpeechRecognizer.ERROR_CLIENT -> "클라이언트 에러"
-                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "퍼미션 없음"
-                SpeechRecognizer.ERROR_NETWORK -> "네트워크 에러"
-                SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "네트웍 타임아웃"
-                SpeechRecognizer.ERROR_NO_MATCH -> "찾을 수 없음"
-                SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RECOGNIZER가 바쁨"
-                SpeechRecognizer.ERROR_SERVER -> "서버가 이상함"
-                SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "말하는 시간초과"
-                else -> "알 수 없는 오류임"
-            }
-            Toast.makeText(applicationContext, "에러가 발생하였습니다. : $message", Toast.LENGTH_SHORT).show()
-        }
-
-        override fun onResults(results: Bundle) {
-            // 말을 하면 ArrayList에 단어를 넣고 textView에 단어를 이어줍니다.
-            val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-            Log.d("STT", "STT working")
-            for (i in matches!!.indices) {
-                Log.d("STT", "STT: " + matches[i])
-            }
-        }
-
-        override fun onPartialResults(partialResults: Bundle) {}
-        override fun onEvent(eventType: Int, params: Bundle) {}
-    }
-
-    private fun startSTT(){
-        Log.d("STT", "STT started")
-        intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,getPackageName())
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,"ko-KR")
-        mRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
-        mRecognizer?.setRecognitionListener(listener)
-        mRecognizer?.startListening(intent)
-    }
-
-    private fun stopSTT() {
-        if (mRecognizer != null) {
-            mRecognizer?.destroy()
-            mRecognizer?.cancel()
-            mRecognizer = null
-        }
-    }
+//    private val listener: RecognitionListener = object : RecognitionListener {
+//        override fun onReadyForSpeech(params: Bundle) {
+//            Toast.makeText(applicationContext, "음성인식을 시작합니다.", Toast.LENGTH_SHORT).show()
+//        }
+//
+//        override fun onBeginningOfSpeech() {}
+//        override fun onRmsChanged(rmsdB: Float) {}
+//        override fun onBufferReceived(buffer: ByteArray) {}
+//        override fun onEndOfSpeech() {}
+//        override fun onError(error: Int) {
+//            val message: String
+//            message = when (error) {
+//                SpeechRecognizer.ERROR_AUDIO -> "오디오 에러"
+//                SpeechRecognizer.ERROR_CLIENT -> "클라이언트 에러"
+//                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "퍼미션 없음"
+//                SpeechRecognizer.ERROR_NETWORK -> "네트워크 에러"
+//                SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "네트웍 타임아웃"
+//                SpeechRecognizer.ERROR_NO_MATCH -> "찾을 수 없음"
+//                SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "RECOGNIZER가 바쁨"
+//                SpeechRecognizer.ERROR_SERVER -> "서버가 이상함"
+//                SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "말하는 시간초과"
+//                else -> "알 수 없는 오류임"
+//            }
+//            Toast.makeText(applicationContext, "에러가 발생하였습니다. : $message", Toast.LENGTH_SHORT).show()
+//        }
+//
+//        override fun onResults(results: Bundle) {
+//            // 말을 하면 ArrayList에 단어를 넣고 textView에 단어를 이어줍니다.
+//            val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+//            Log.d("STT", "STT working")
+//            for (i in matches!!.indices) {
+//                Log.d("STT", "STT: " + matches[i])
+//            }
+//        }
+//
+//        override fun onPartialResults(partialResults: Bundle) {}
+//        override fun onEvent(eventType: Int, params: Bundle) {}
+//    }
+//
+//    private fun startSTT(){
+//        Log.d("STT", "STT started")
+//        intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+//        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,getPackageName())
+//        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,"ko-KR")
+//        mRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+//        mRecognizer?.setRecognitionListener(listener)
+//        mRecognizer?.startListening(intent)
+//    }
+//
+//    private fun stopSTT() {
+//        if (mRecognizer != null) {
+//            mRecognizer?.destroy()
+//            mRecognizer?.cancel()
+//            mRecognizer = null
+//        }
+//    }
 
     private fun startRecording() {
         Wearable.getDataClient(this).addListener(this)

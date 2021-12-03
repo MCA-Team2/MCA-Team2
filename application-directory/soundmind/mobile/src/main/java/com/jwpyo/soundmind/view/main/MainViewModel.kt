@@ -1,5 +1,8 @@
 package com.jwpyo.soundmind.view.main
 
+import android.content.Context
+import android.os.Environment
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
@@ -13,12 +16,16 @@ import com.jwpyo.soundmind.model.voice.Voice
 import com.jwpyo.soundmind.repository.StressRepository
 import com.jwpyo.soundmind.repository.VoiceRepository
 import com.jwpyo.soundmind.utils.getVolume
+import com.jwpyo.soundmind.utils.getSTT
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalDateTime
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
 import java.lang.Integer.max
 import java.lang.Integer.min
 
@@ -27,6 +34,7 @@ class MainViewModel(
     private val dataClient: DataClient,
     private val voiceRepository: VoiceRepository,
     private val stressRepository: StressRepository,
+    private val context: Context,
 ) : ViewModel() {
     val historyDate: Flow<LocalDate>
     val volume: Flow<Flow<List<VolumeItem>>>
@@ -40,9 +48,10 @@ class MainViewModel(
 
     fun insertVoice(asset: Asset, startLDT: LocalDateTime, endLDT: LocalDateTime) {
         viewModelScope.launch {
+            Log.d("Data", "Voice Data Received ")
             val array = dataClient.getByteArrayFromAsset(asset)
             voiceRepository.insertVoice(
-                Voice(startLDT, endLDT, array, getVolume(array))
+                Voice(startLDT, endLDT, array, getSTT(array), getVolume(array))
             )
         }
     }

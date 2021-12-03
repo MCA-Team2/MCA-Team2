@@ -19,7 +19,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        ActivityCompat.requestPermissions(this, arrayOf<String>(Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO), 3)
+    //    ActivityCompat.requestPermissions(this, arrayOf<String>(Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 3)
 
         binding.apply {
             stateAdapter = MainStateAdapter(this@MainActivity)
