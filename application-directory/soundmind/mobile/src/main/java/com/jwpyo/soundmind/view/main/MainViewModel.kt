@@ -51,7 +51,8 @@ class MainViewModel(
             Log.d("Data", "Voice Data Received ")
             val array = dataClient.getByteArrayFromAsset(asset)
             voiceRepository.insertVoice(
-                Voice(startLDT, endLDT, array, getSTT(array), getVolume(array))
+               // Voice(startLDT, endLDT, array, getSTT(array), getVolume(array), checkBell(this, array))
+                Voice(startLDT, endLDT, array, "", getVolume(array), true)
             )
         }
     }

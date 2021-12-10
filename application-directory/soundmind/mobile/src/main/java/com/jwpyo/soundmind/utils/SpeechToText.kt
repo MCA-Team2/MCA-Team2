@@ -11,10 +11,6 @@ fun getSTT(byteArray: ByteArray) : String {
     val clientId = "4qxmevcefs" // Application Client ID";
     val clientSecret = "ql01xMsx8ZSkk34LQNAI8b1OKsB105NU9wYDckyp" // Application Client Secret";
 
-    val path = context.getFilesDir()
-    val letDirectory = File(path, "LET")
-    letDirectory.mkdirs()
-    val voiceFile = File(letDirectory, "temp.mp3")
     val language = "Kor" // 언어 코드 ( Kor, Jpn, Eng, Chn )
     val apiURL =
         "https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=$language"
@@ -33,7 +29,7 @@ fun getSTT(byteArray: ByteArray) : String {
         try {
             val outputStream = conn.outputStream
             Log.d("STT", "Insert voiceFile" )
-            val inputStream = FileInputStream(voiceFile)
+            val inputStream = ByteArrayInputStream(byteArray)
             Log.d("STT", "voiceFile insert")
             val buffer = ByteArray(4096)
             var bytesRead = -1
