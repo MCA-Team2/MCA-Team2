@@ -20,4 +20,5 @@
     <string name="send_to">SEND_TO</string>
     <string name="content_description_default">image</string>
     <string name="confirm_text">confirm</string>
+    <string name="download_instruction_text">음성 파일을 다운로드 받으려면 아래 버튼을 클릭해주세요</string>
 </resources>

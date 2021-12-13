@@ -49,21 +49,35 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                app:layout_constraintGuide_begin="550dp" />
+                app:layout_constraintGuide_begin="375dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_script_t"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="400dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_script_b"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_begin="680dp" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline_controller_t"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                app:layout_constraintGuide_begin="600dp" />
+                app:layout_constraintGuide_begin="700dp" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline_controller_b"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                app:layout_constraintGuide_begin="660dp" />
+                app:layout_constraintGuide_begin="760dp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/date_container"
@@ -178,6 +192,11 @@
                             android:layout_height="0dp"
                             android:layout_weight="1" />
 
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="2dp"
+                            android:background="@color/grid" />
+
                     </LinearLayout>
 
                     <LinearLayout
@@ -252,25 +271,34 @@
 
                         <ImageView
                             android:id="@+id/start_line_holder"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
                             android:layout_gravity="bottom|start"
-                            android:background="#000"
-                            android:contentDescription="@string/content_description_default" />
+                            android:contentDescription="@string/content_description_default"
+                            android:src="@drawable/ic_baseline_subdirectory_arrow_right_24" />
 
                         <ImageView
                             android:id="@+id/end_line_holder"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
                             android:layout_gravity="bottom|end"
-                            android:background="#000"
-                            android:contentDescription="@string/content_description_default" />
+                            android:contentDescription="@string/content_description_default"
+                            android:src="@drawable/ic_baseline_subdirectory_arrow_left_24" />
 
                     </FrameLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </HorizontalScrollView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@color/white"
+                android:padding="10dp"
+                android:text="어쩌고 저쩌고... 블라블라..."
+                app:layout_constraintBottom_toBottomOf="@id/guideline_script_b"
+                app:layout_constraintTop_toTopOf="@id/guideline_script_t" />
 
             <TextView
                 android:id="@+id/timestamp_text"

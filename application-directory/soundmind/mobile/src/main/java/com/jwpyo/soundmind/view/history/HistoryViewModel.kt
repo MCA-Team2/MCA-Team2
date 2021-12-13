@@ -42,6 +42,7 @@ class HistoryViewModel(
     val audioScopeRange: LiveData<String>
 
     val getAudioByteArrayLiveDate: LiveData<() -> ByteArray>
+    val audioByteArray: ByteArray? get() = getAudioByteArrayLiveDate.value?.let { it() }
 
     val soundPlayer: SoundPlayer = SoundPlayer()
     var playingJob: Job? = null
@@ -49,10 +50,8 @@ class HistoryViewModel(
     fun play() {
         audioIsPlaying.postValue(true)
         playingJob = CoroutineScope(Dispatchers.IO).launch {
-            val byteArray = getAudioByteArrayLiveDate.value?.let { it() }
-            Log.e("hello", "hello $byteArray")
-            if (byteArray != null) {
-                val inputStream = ByteArrayInputStream(byteArray)
+            if (audioByteArray != null) {
+                val inputStream = ByteArrayInputStream(audioByteArray)
                 soundPlayer.play(inputStream)
                 stop()
             }
