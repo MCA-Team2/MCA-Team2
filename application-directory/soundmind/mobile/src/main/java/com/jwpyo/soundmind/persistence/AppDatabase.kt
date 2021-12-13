@@ -16,7 +16,7 @@ import com.jwpyo.soundmind.persistence.dao.VoiceDao
         Voice::class,
         Stress::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(
