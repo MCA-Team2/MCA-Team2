@@ -18,8 +18,11 @@ interface VoiceDao {
     fun delete(voice: Voice)
 
     @Query("SELECT * FROM Voice")
-    fun getVoices(): Flow<List<Voice>>
+    fun getVoicesFlow(): Flow<List<Voice>>
 
     @Query("SELECT * FROM Voice WHERE startLDT > :ldt1 AND endLDT < :ldt2")
-    fun getVoices(ldt1: LocalDateTime, ldt2: LocalDateTime): Flow<List<Voice>>
+    fun getVoices(ldt1: LocalDateTime, ldt2: LocalDateTime): List<Voice>
+
+    @Query("SELECT * FROM Voice WHERE startLDT > :ldt1 AND endLDT < :ldt2")
+    fun getVoicesFlow(ldt1: LocalDateTime, ldt2: LocalDateTime): Flow<List<Voice>>
 }
