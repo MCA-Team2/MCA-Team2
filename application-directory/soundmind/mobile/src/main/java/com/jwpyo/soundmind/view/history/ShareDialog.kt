@@ -48,18 +48,12 @@ class ShareDialog : DatabindingDialog() {
         val ctx = requireContext()
 
         binding.downloadButton.setOnClickListener {
-//            val extRoot: File =
-//                requireActivity().getExternalFilesDir(null) ?: return@setOnClickListener
-//            val someFile = "/test/some.xls"
-//
-//            val xlsFile = File(extRoot, someFile)
             val shareIntent = Intent(Intent.ACTION_SEND)
             shareIntent.type = "audio/wav"
 
             val contentUri: Uri = FileProvider.getUriForFile(
                 ctx,
                 ctx.packageName + ".fileprovider",
-//                xlsFile
                 viewModel.audioByteArray.toTempFile()
             )
             shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri)

@@ -179,6 +179,8 @@ class HistoryFragment : DatabindingFragment() {
             binding.stressChart.setData(stressInfo)
         }
 
-        viewModel.getAudioByteArrayLiveDate.observe(viewLifecycleOwner) { }
+        viewModel.getAudioByteArrayLiveDate.observe(viewLifecycleOwner) {
+            Log.d("hello", "$it")
+        }
     }
 }
