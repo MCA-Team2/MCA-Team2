@@ -21,12 +21,13 @@ import com.jwpyo.soundmind.extensions.show
 import com.jwpyo.soundmind.model.stress.Stress
 import com.jwpyo.soundmind.model.ui.VolumeItem
 import com.jwpyo.soundmind.utils.Constant.WIDTH_PER_HOUR
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 @SuppressLint("ClickableViewAccessibility")
 class HistoryFragment : DatabindingFragment() {
     private lateinit var binding: FragmentHistoryBinding
-    private val viewModel by viewModel<HistoryViewModel>()
+    private val viewModel by sharedViewModel<HistoryViewModel>()
 
     private var volumeLiveData: LiveData<List<VolumeItem>>? = null
     private var volumeObserver: Observer<List<VolumeItem>>? = null
@@ -72,6 +73,8 @@ class HistoryFragment : DatabindingFragment() {
         binding.stopButton.setOnClickListener {
             viewModel.stop()
         }
+
+        binding.audioFileExportButton.setOnClickListener { ShareDialog().show(context) }
 
         binding.chartScrollView.setOnTouchListener { _, event ->
             when (event.action) {

@@ -2,10 +2,10 @@ package com.jwpyo.soundmind.utils
 
 import android.media.AudioAttributes
 import android.media.AudioFormat
+import android.media.AudioTimestamp
 import android.media.AudioTrack
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
+import android.util.Log
+import kotlinx.coroutines.*
 import java.io.InputStream
 
 class SoundPlayer {
@@ -53,15 +53,24 @@ class SoundPlayer {
         audioTrack.setVolume(AudioTrack.getMaxVolume())
         audioTrack.play()
 
+//        CoroutineScope(Dispatchers.IO).launch {
+//            while (true) {
+//                val audioTimestamp = AudioTimestamp()
+//                audioTrack.getTimestamp(audioTimestamp)
+//                Log.e("hello", "hello ${audioTimestamp.nanoTime}")
+//                delay(1000)
+//            }
+//        }
+
         try {
             withContext(Dispatchers.IO) {
                 val buffer = ByteArray(intSize * 2)
                 while (isActive) {
-                    // TODO> Inappropriate blocking method call
                     val read = inputStream.read(buffer, 0, buffer.size)
                     if (read < 0) break
                     audioTrack.write(buffer, 0, read)
                 }
+
             }
         } finally {
             audioTrack.release()
