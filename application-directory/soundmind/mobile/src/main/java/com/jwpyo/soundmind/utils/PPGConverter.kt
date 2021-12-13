@@ -1,7 +1,10 @@
 package com.jwpyo.soundmind.utils
 
 import android.app.Activity
+import android.content.Context
 import android.content.res.Resources
+import android.util.Log
+import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.jwpyo.soundmind.model.stress.Stress
 import com.jwpyo.soundmind.model.ui.PPG
 import org.jtransforms.fft.DoubleFFT_1D
@@ -12,17 +15,12 @@ import kotlin.math.pow
 class PPGConverter {
 
     // SWELL datasets
-    private var swellLoaded : Boolean = false
     private val swellLfhf : MutableList<Double> = mutableListOf()
     private val swellRmssd : MutableList<Double> = mutableListOf()
     private val swellPnn : MutableList<Double> = mutableListOf()
 
     fun getStress(ppgList: Array<PPG>): Stress? {
         if (ppgList.size < REQUIRE_SAMPLE_NUMBER) return null
-        if (!swellLoaded) {
-            swellLoaded = true
-            loadSwell()
-        }
         val ldt = ppgList.maxOf { it.ldt }
         val stressValue = analyzeRR(
             analyzePPG(ppgList.map { ppg -> ppg.sensorValue.toDouble() }.toMutableList())
@@ -384,16 +382,17 @@ class PPGConverter {
         return swellLfhf[swellIndex]
     }
 
-    private fun loadSwell() {
-        Resources.getSystem().openRawResource(com.jwpyo.soundmind.R.raw.swell_lfhf).bufferedReader().useLines { lines ->
+    fun loadSwell(context : Context) {
+        context.resources.openRawResource(com.jwpyo.soundmind.R.raw.swell_lfhf).bufferedReader().useLines { lines ->
             lines.forEach { swellLfhf.add(it.toDouble()) }
         }
-        Resources.getSystem().openRawResource(com.jwpyo.soundmind.R.raw.swell_rmssd).bufferedReader().useLines { lines ->
+        context.resources.openRawResource(com.jwpyo.soundmind.R.raw.swell_rmssd).bufferedReader().useLines { lines ->
             lines.forEach { swellRmssd.add(it.toDouble()) }
         }
-        Resources.getSystem().openRawResource(com.jwpyo.soundmind.R.raw.swell_pnn50).bufferedReader().useLines { lines ->
+        context.resources.openRawResource(com.jwpyo.soundmind.R.raw.swell_pnn50).bufferedReader().useLines { lines ->
             lines.forEach { swellPnn.add(it.toDouble()) }
         }
+        Log.d("SWELLLOAD", swellLfhf.size.toString())
     }
 
     companion object {

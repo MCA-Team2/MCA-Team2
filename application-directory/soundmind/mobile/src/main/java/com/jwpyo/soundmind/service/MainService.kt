@@ -70,6 +70,8 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
 //        startSTT()
         startRecording()
 
+        ppgConverter.loadSwell(applicationContext)
+
         return super.onStartCommand(intent, flags, startId)
     }
 
