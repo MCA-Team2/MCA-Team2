@@ -9,7 +9,7 @@ import uk.me.berndporr.iirj.Butterworth
 import kotlin.math.abs
 import kotlin.math.pow
 
-class PPGConverter : Activity() {
+class PPGConverter {
 
     // SWELL datasets
     private var swellLoaded : Boolean = false
