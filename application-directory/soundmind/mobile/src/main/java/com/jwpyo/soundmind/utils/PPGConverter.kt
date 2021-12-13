@@ -211,9 +211,7 @@ class PPGConverter {
             )
         }
 
-        // TODO : Implement Welch's method
-
-        // This time just FFT
+        // Just FFT
         val binFrequency = 1 / (rrXNew.last() - rrXNew.first())
         val input = DoubleArray(rrXNew.size * 2)
         val rrMagnitude = mutableListOf<Double>()
@@ -247,22 +245,6 @@ class PPGConverter {
                 ), 0.0
             ) * rrMagnitude[i]
         }
-
-        // RR interval Visualization
-        val dataSets = ArrayList<ILineDataSet>()
-        val rrEntries = mutableListOf<Entry>()
-        for (i in 0 until rrXNew.size) {
-            rrEntries.add(Entry(rrXNew[i].toFloat(), rrYNew[i].toFloat()))
-        }
-        /*
-        for (i in 1 until rrMagnitude.size / 2) {
-            rrEntries.add(Entry((i * binFrequency).toFloat(), rrMagnitude[i].toFloat()))
-        }
-        */
-        val rrDataSet = LineDataSet(rrEntries, "RR Interval")
-        rrDataSet.valueTextSize = 0.0F
-        rrDataSet.setDrawCircles(false)
-        dataSets.add(rrDataSet)
 
         return lf / hf
     }
