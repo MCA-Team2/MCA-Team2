@@ -1,16 +1,11 @@
 package com.jwpyo.soundmind.service
 
-// android.speech 클래스에서 필요한 객체 임포트
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.os.Bundle
 import android.os.IBinder
-import android.speech.RecognitionListener
-import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
-import android.widget.Toast
 import com.google.android.gms.wearable.*
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.model.stress.Stress
@@ -167,7 +162,6 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
 
     private fun stopRecording() {
         Wearable.getDataClient(this).removeListener(this)
-
     }
 
     private fun onAudioChangedEvent(dataEvent: DataEvent) =
@@ -232,7 +226,4 @@ class MainService : Service(), DataClient.OnDataChangedListener, KoinComponent {
             }
         }
     }
-
-
-
 }

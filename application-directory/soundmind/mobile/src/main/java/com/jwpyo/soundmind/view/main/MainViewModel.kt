@@ -34,7 +34,6 @@ class MainViewModel(
     private val dataClient: DataClient,
     private val voiceRepository: VoiceRepository,
     private val stressRepository: StressRepository,
-    private val context: Context,
 ) : ViewModel() {
     val historyDate: Flow<LocalDate>
     val volume: Flow<Flow<List<VolumeItem>>>
