@@ -1,6 +1,8 @@
 package com.jwpyo.soundmind.view.record
 
+import android.content.Intent
 import android.os.Bundle
+import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -20,9 +22,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 
+
 class RecordFragment : DatabindingFragment() {
     private lateinit var binding: FragmentRecordBinding
     private val viewModel by sharedViewModel<MainViewModel>()
+
+    private lateinit var intent: Intent
+    private lateinit var mRecognizer: SpeechRecognizer
 
     override fun onCreateView(
         inflater: LayoutInflater,

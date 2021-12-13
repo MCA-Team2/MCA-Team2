@@ -1,7 +1,9 @@
 package com.jwpyo.soundmind.view.main
 
+import android.Manifest
 import android.os.Bundle
 import android.view.View
+import androidx.core.app.ActivityCompat
 import com.google.android.gms.wearable.*
 import com.jwpyo.soundmind.R
 import com.jwpyo.soundmind.base.BaseActivity
@@ -16,6 +18,8 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+    //    ActivityCompat.requestPermissions(this, arrayOf<String>(Manifest.permission.INTERNET, Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE), 3)
 
         binding.apply {
             stateAdapter = MainStateAdapter(this@MainActivity)
