@@ -34,6 +34,8 @@ class MainViewModel(
             if(volume >= VOLUME_THRESHOLD)
                 text = getSTT(array)
 
+            Log.d("STT", "STT Result: " + text)
+
             voiceRepository.insertVoice(
                 Voice(startLDT, endLDT, array, text, volume, false)
             )
