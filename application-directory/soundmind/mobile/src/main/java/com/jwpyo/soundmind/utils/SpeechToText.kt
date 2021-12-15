@@ -1,28 +1,32 @@
 package com.jwpyo.soundmind.utils
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import net.sourceforge.lame.lowlevel.LameEncoder
 import net.sourceforge.lame.mp3.Lame
 import net.sourceforge.lame.mp3.MPEGMode
-import org.json.JSONObject
-import java.io.*
+import java.io.BufferedReader
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.sound.sampled.AudioFormat
 
+suspend fun getSTT(byteArray: ByteArray): String = coroutineScope {
+    withContext(Dispatchers.IO) {
+        lateinit var response: StringBuffer
+        var text = ""
+        val clientId = "4qxmevcefs" // Application Client ID";
+        val clientSecret = "ql01xMsx8ZSkk34LQNAI8b1OKsB105NU9wYDckyp" // Application Client Secret";
 
-fun getSTT(byteArray: ByteArray) : String {
-    lateinit var response : StringBuffer
-    var text = ""
-    val clientId = "4qxmevcefs" // Application Client ID";
-    val clientSecret = "ql01xMsx8ZSkk34LQNAI8b1OKsB105NU9wYDckyp" // Application Client Secret";
+        val language = "Kor" // 언어 코드 ( Kor, Jpn, Eng, Chn )
+        val apiURL =
+            "https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=$language"
+        val url = URL(apiURL)
 
-    val language = "Kor" // 언어 코드 ( Kor, Jpn, Eng, Chn )
-    val apiURL =
-        "https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=$language"
-    val url = URL(apiURL)
-
-    val thread = Thread {
         try {
             val conn = url.openConnection() as HttpURLConnection
             conn.useCaches = false
@@ -69,15 +73,15 @@ fun getSTT(byteArray: ByteArray) : String {
                 println("error !!!")
             }
         } catch (e: Exception) {
-            Log.e("STT", "Exception?" + e.toString() )
+            Log.e("STT", "Exception?" + e.toString())
         }
+
+        text
     }
-    thread.start()
-    return text
 }
 
 
-fun encodePcmToMp3(pcm: ByteArray) : ByteArray {
+fun encodePcmToMp3(pcm: ByteArray): ByteArray {
     val encoder = LameEncoder(
         AudioFormat(8000.0f, 16, 1, true, false),
         160,
