@@ -22,19 +22,7 @@ fun getSTT(byteArray: ByteArray) : String {
         "https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=$language"
     val url = URL(apiURL)
 
-
     val thread = Thread {
-//        val base_path = "/data/user/0/com.jwpyo.soundmind/files"
-//        val file = File(base_path, "temp.mp3")
-////        while(file.exists()) {
-////            Log.d("STT", "Waiting for former thread to be finished...")
-////            Thread.sleep(10_000)
-////        }
-
-//        Log.d("STT", "Encoding ByteArray to Mp3 File")
-//        val voiceFile = encodePcmToMp3(byteArray)
-//        Log.d("STT", "Thread Started on the size " + voiceFile.length().toString())
-
         try {
             val conn = url.openConnection() as HttpURLConnection
             conn.useCaches = false
@@ -83,20 +71,15 @@ fun getSTT(byteArray: ByteArray) : String {
         } catch (e: Exception) {
             Log.e("STT", "Exception?" + e.toString() )
         }
-//
-//        file.delete()
-//        Log.d("STT", "Temp file Deleted on Thread End")
     }
     thread.start()
-
     return text
 }
 
 
 fun encodePcmToMp3(pcm: ByteArray) : ByteArray {
     val encoder = LameEncoder(
-        AudioFormat(8000.0f, 16,
-            1, true, false),
+        AudioFormat(8000.0f, 16, 1, true, false),
         160,
         MPEGMode.MONO,
         Lame.QUALITY_HIGHEST,
@@ -116,30 +99,6 @@ fun encodePcmToMp3(pcm: ByteArray) : ByteArray {
         mp3.write(buffer, 0, bytesWritten)
     }
     encoder.close()
-
-//    val base_path = "/data/user/0/com.jwpyo.soundmind/files"
-//    val file = File(base_path, "temp.mp3")
-//    if(file.exists()) {
-//        file.delete()
-//        Log.e("STT", "Shouldn't happen!")
-//    }
-//
-//    try {
-//        file.createNewFile()
-//    } catch (e: IOException) {
-//        e.printStackTrace()
-//        Log.e("STT", "cannot create file")
-//    }
-//
-//    var stream: FileOutputStream? = null
-//    try {
-//        stream = FileOutputStream("/data/user/0/com.jwpyo.soundmind/files/temp.mp3")
-//        stream.write(mp3.toByteArray())
-//    } catch (e: FileNotFoundException) {
-//        e.printStackTrace()
-//    } catch (e: IOException) {
-//        e.printStackTrace()
-//    }
 
     return mp3.toByteArray()
 }
