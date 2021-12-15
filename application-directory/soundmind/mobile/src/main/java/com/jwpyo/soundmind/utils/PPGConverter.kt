@@ -1,10 +1,6 @@
 package com.jwpyo.soundmind.utils
 
-import android.app.Activity
-import android.content.Context
-import android.content.res.Resources
 import android.util.Log
-import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.jwpyo.soundmind.model.stress.Stress
 import com.jwpyo.soundmind.model.ui.PPG
 import org.jtransforms.fft.DoubleFFT_1D
@@ -13,11 +9,6 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 class PPGConverter {
-
-    // SWELL datasets
-    private val swellLfhf : MutableList<Double> = mutableListOf()
-    private val swellRmssd : MutableList<Double> = mutableListOf()
-    private val swellPnn : MutableList<Double> = mutableListOf()
 
     fun getStress(ppgList: Array<PPG>): Stress? {
         if (ppgList.size < REQUIRE_SAMPLE_NUMBER) return null
@@ -254,7 +245,7 @@ class PPGConverter {
             ) * rrMagnitude[i]
         }
 
-        var lfhf = lf / hf
+        val lfhf = lf / hf
 
         var rmssd = 0.0
         var pnn50 = 0.0
@@ -265,134 +256,17 @@ class PPGConverter {
             }
         }
         rmssd = kotlin.math.sqrt(rmssd / (rrY.size - 1)) * 1000
-        pnn50 = pnn50 / (rrY.size - 1) * 100
+        pnn50 = pnn50 / (rrY.size - 1)
 
 
         val hr = 60.0 / (rrX.last() / rrY.size)
 
-        val lfhfSwell = lfhf2Swell(lfhf)
-        val rmssdSwell = rmssd2Swell(rmssd)
-        val pnnSwell = pnn2Swell(pnn50)
-
         val result =
-            DecisionTreeClassifier.predict(doubleArrayOf(hr, rmssdSwell, pnnSwell, lfhfSwell))
+            DecisionTreeClassifier.predict(doubleArrayOf(hr, rmssd, pnn50, lfhf))
 
-        return (2.0).pow(result.toDouble() - 1)
-    }
+        Log.d("SWELL_DEBUG", "%d %.3f %.3f %.3f %.3f".format(result, hr, rmssd, pnn50, lfhf))
 
-    private fun rmssd2Swell(rmssd: Double) : Double {
-        val maxssd : Double = 100.0 // Clamp to this
-        val minssd : Double = 40.0 // Clamp to this
-        val partition : Int = 100
-        val x = mutableListOf<Double>()
-        val y = mutableListOf<Double>()
-        val accumY = mutableListOf<Double>()
-        for (i in 0 until partition + 1) {
-            x.add((maxssd - minssd) * i / partition + minssd)
-        }
-        x.forEach { value ->
-            y.add(kotlin.math.exp(-((value - 70.177) / 12.459).pow(2.0)))
-        }
-        accumY.add(y[0])
-        for (i in 1 until y.size) {
-            accumY.add(accumY.last() + y[i])
-        }
-        accumY.replaceAll { value -> value / accumY.last() }
-        accumY.add(1.0)
-
-        val index = java.lang.Double.max(
-            java.lang.Double.min(
-                partition.toDouble(),
-                (rmssd - minssd) * partition / (maxssd - minssd)
-            ), 0.0
-        )
-        val indexInt = index.toInt()
-        val indexFraction = index - indexInt.toDouble()
-
-        val swellIndex =
-            ((accumY[indexInt] * (1 - indexFraction) + accumY[indexInt + 1] * indexFraction) * swellRmssd.size).toInt()
-                .coerceAtMost(swellRmssd.size - 1).coerceAtLeast(0)
-
-        return swellRmssd[swellIndex]
-    }
-
-    private fun pnn2Swell(pnn: Double) : Double {
-        val maxpnn : Double = 50.0 // Clamp to this
-        val minpnn : Double = 0.0 // Clamp to this
-        val partition : Int = 100
-        val x = mutableListOf<Double>()
-        val y = mutableListOf<Double>()
-        val accumY = mutableListOf<Double>()
-        for (i in 0 until partition + 1) {
-            x.add((maxpnn - minpnn) * i / partition + minpnn)
-        }
-        x.forEach { value ->
-            y.add(kotlin.math.exp(-((value - 28.781) / 6.8604 ).pow(2.0)))
-        }
-        accumY.add(y[0])
-        for (i in 1 until y.size) {
-            accumY.add(accumY.last() + y[i])
-        }
-        accumY.replaceAll { value -> value / accumY.last() }
-        accumY.add(1.0)
-
-        val index = java.lang.Double.max(
-            java.lang.Double.min(
-                partition.toDouble(),
-                (pnn - minpnn) * partition / (maxpnn - minpnn)
-            ), 0.0
-        )
-        val indexInt = index.toInt()
-        val indexFraction = index - indexInt.toDouble()
-
-        val swellIndex =
-            ((accumY[indexInt] * (1 - indexFraction) + accumY[indexInt + 1] * indexFraction) * swellPnn.size).toInt()
-                .coerceAtMost(swellPnn.size - 1).coerceAtLeast(0)
-
-        return swellPnn[swellIndex]
-    }
-
-    private fun lfhf2Swell(lfhf: Double) : Double {
-        val maxRatio : Double = 5.0 // Clamp to this
-        val partition : Int = 100
-        val x = mutableListOf<Double>()
-        val y = mutableListOf<Double>()
-        val accumY = mutableListOf<Double>()
-        for (i in 0 until partition + 1) {
-            x.add(maxRatio * i / partition)
-        }
-        x.forEach { value ->
-            y.add(value.pow(4.1) / (kotlin.math.exp(value * 4.68) - 1 + 1e-6))
-        }
-        accumY.add(y[0])
-        for (i in 1 until y.size) {
-            accumY.add(accumY.last() + y[i])
-        }
-        accumY.replaceAll { value -> value / accumY.last() }
-        accumY.add(1.0)
-
-        val index = java.lang.Double.min(partition.toDouble(), lfhf * partition / maxRatio)
-        val indexInt = index.toInt()
-        val indexFraction = index - indexInt.toDouble()
-
-        val swellIndex =
-            ((accumY[indexInt] * (1 - indexFraction) + accumY[indexInt + 1] * indexFraction) * swellLfhf.size).toInt()
-                .coerceAtMost(swellLfhf.size - 1).coerceAtLeast(0)
-
-        return swellLfhf[swellIndex]
-    }
-
-    fun loadSwell(context : Context) {
-        context.resources.openRawResource(com.jwpyo.soundmind.R.raw.swell_lfhf).bufferedReader().useLines { lines ->
-            lines.forEach { swellLfhf.add(it.toDouble()) }
-        }
-        context.resources.openRawResource(com.jwpyo.soundmind.R.raw.swell_rmssd).bufferedReader().useLines { lines ->
-            lines.forEach { swellRmssd.add(it.toDouble()) }
-        }
-        context.resources.openRawResource(com.jwpyo.soundmind.R.raw.swell_pnn50).bufferedReader().useLines { lines ->
-            lines.forEach { swellPnn.add(it.toDouble()) }
-        }
-        Log.d("SWELLLOAD", swellLfhf.size.toString())
+        return (2.0).pow(result.toDouble() * 2 - 1)
     }
 
     companion object {
