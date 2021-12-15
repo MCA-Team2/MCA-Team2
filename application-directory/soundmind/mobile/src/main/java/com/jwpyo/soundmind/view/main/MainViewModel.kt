@@ -1,5 +1,6 @@
 package com.jwpyo.soundmind.view.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.wearable.Asset
@@ -20,11 +21,21 @@ class MainViewModel(
     private val voiceRepository: VoiceRepository,
     private val stressRepository: StressRepository,
 ) : ViewModel() {
+    val VOLUME_THRESHOLD = 13.5f
+
     fun insertVoice(asset: Asset, startLDT: LocalDateTime, endLDT: LocalDateTime) {
         viewModelScope.launch {
             val array = dataClient.getByteArrayFromAsset(asset)
+
+            val volume = getVolume(array)
+            Log.d("STT", "Volume of the file: " + volume.toString())
+
+            var text = ""
+            if(volume >= VOLUME_THRESHOLD)
+                text = getSTT(array)
+
             voiceRepository.insertVoice(
-                Voice(startLDT, endLDT, array, getSTT(array), getVolume(array), false)
+                Voice(startLDT, endLDT, array, text, volume, false)
             )
         }
     }
