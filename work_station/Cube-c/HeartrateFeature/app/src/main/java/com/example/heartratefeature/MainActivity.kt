@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -20,12 +19,13 @@ import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.data.ScatterDataSet
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import org.jtransforms.fft.DoubleFFT_1D
 import uk.me.berndporr.iirj.Butterworth
 import java.lang.Double.max
 import java.lang.Double.min
+import kotlin.math.abs
+import kotlin.math.pow
 
 class MainActivity : Activity(), SensorEventListener {
     private lateinit var binding: ActivityMainBinding
@@ -47,6 +47,11 @@ class MainActivity : Activity(), SensorEventListener {
     private val WIDTH_FREQUENCY : Double = 2.8 // Hz
     private val BPM_MIN : Double = 40.0
     private val BPM_MAX : Double = 180.0
+
+    // SWELL datasets
+    private val swellLfhf : MutableList<Double> = mutableListOf()
+    private val swellRmssd : MutableList<Double> = mutableListOf()
+    private val swellPnn : MutableList<Double> = mutableListOf()
 
     // Chart (Debug)
     private var chartView: LineChart? = null
@@ -84,6 +89,8 @@ class MainActivity : Activity(), SensorEventListener {
 
         // Chart (Debug)
         chartView = findViewById(R.id.lineChart)
+
+        loadSwell()
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -101,7 +108,7 @@ class MainActivity : Activity(), SensorEventListener {
                     timestampStart = timestamp
                 }
             }
-            Log.d(TAG_RAW, "$timestamp $value")
+            // Log.d(TAG_RAW, "$timestamp $value")
             ppgData.add(value.toDouble())
         }
     }
@@ -164,7 +171,7 @@ class MainActivity : Activity(), SensorEventListener {
             0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.5, 2.0, 3.0
         )
         val optimalPPGPeak = mutableListOf<Int>()
-        var optimalPPGRR = mutableListOf<Double>()
+        val optimalPPGRR = mutableListOf<Double>()
         var optimalRRStd = Double.MAX_VALUE
 
         for (threshold in thresholdLevel) {
@@ -227,11 +234,10 @@ class MainActivity : Activity(), SensorEventListener {
 
         // Define RR range and reject peak anomaly
         var meanRR = 0.0
-        var rangeRR = 0.0
         var optimalPPGRRCorrection = mutableListOf<Double>()
         optimalPPGRR.forEach { value -> meanRR += value }
         meanRR /= optimalPPGRR.size
-        rangeRR = max(0.3 * meanRR, 0.3)
+        var rangeRR : Double = max(0.3 * meanRR, 0.3)
         for (i in 0 until optimalPPGRR.size - 1) {
             val val1 = optimalPPGRR[i]
             val val2 = optimalPPGRR[i + 1]
@@ -257,10 +263,10 @@ class MainActivity : Activity(), SensorEventListener {
         // optimalPPGRR.forEach{ value -> Log.d(TAG, value.toString()) }
 
         // Visualize Result
+        /*
         val dataSets = ArrayList<ILineDataSet>()
 
         // Draw PPG and Peaks
-        /*
         val entries = mutableListOf<Entry>()
         ppgFiltered.forEachIndexed { index, value ->
             if (index % 10 == 0 && index < ppgFiltered.size / 3) {
@@ -338,8 +344,6 @@ class MainActivity : Activity(), SensorEventListener {
                     + (t3-2*t2+t) * rrTangent[index-1] + (t3-t2) * rrTangent[index])
         }
 
-        // TODO : Implement Welch's method
-
         // This time just FFT
         val binFrequency = 1 / (rrXNew.last() - rrXNew.first())
         val input = DoubleArray(rrXNew.size * 2)
@@ -360,7 +364,31 @@ class MainActivity : Activity(), SensorEventListener {
             lf += max(min(min((i + 0.5) * binFrequency - 0.04, 0.15 - (i - 0.5) * binFrequency), binFrequency), 0.0) * rrMagnitude[i]
             hf += max(min(min((i + 0.5) * binFrequency - 0.15, 0.40 - (i - 0.5) * binFrequency), binFrequency), 0.0) * rrMagnitude[i]
         }
-        textView?.text = "%.2f".format(lf / hf)
+
+        var lfhf = lf / hf
+
+        var rmssd = 0.0
+        var pnn50 = 0.0
+        for (i in 0 until rrY.size - 1) {
+            rmssd += (rrY[i + 1] - rrY[i]) * (rrY[i + 1] - rrY[i])
+            if (abs(rrY[i + 1] - rrY[i]) >= 0.05) {
+                pnn50 += 1.0
+            }
+        }
+        rmssd = kotlin.math.sqrt(rmssd / (rrY.size - 1)) * 1000
+        pnn50 = pnn50 / (rrY.size - 1) * 100
+
+
+        val hr = 60.0 / (rrX.last() / rrY.size)
+
+        val lfhfSwell = lfhf2Swell(lf / hf)
+        val rmssdSwell = rmssd2Swell(rmssd)
+        val pnnSwell = pnn2Swell(pnn50)
+
+        val result = DecisionTreeClassifier.predict(doubleArrayOf(hf, rmssdSwell, pnnSwell, lfhfSwell))
+
+        textView?.text = "%.2f %.1f %.1f %.1f\n %.1f %.1f %.1f\n%d".format(lf / hf, rmssd, pnn50, hr, lfhfSwell, rmssdSwell, pnnSwell, result)
+
 
         // RR interval Visualization
         val dataSets = ArrayList<ILineDataSet>()
@@ -371,23 +399,12 @@ class MainActivity : Activity(), SensorEventListener {
         }
         Log.d(TAG_CALC, "LF : $lf")
         Log.d(TAG_CALC, "HF : $hf")
-        /*
-        for (i in 1 until rrMagnitude.size / 2) {
-            rrEntries.add(Entry((i * binFrequency).toFloat(), rrMagnitude[i].toFloat()))
-        }
-        */
         val rrDataSet = LineDataSet(rrEntries, "RR Interval")
         rrDataSet.valueTextSize = 0.0F
         rrDataSet.setDrawCircles(false)
         dataSets.add(rrDataSet)
 
         val data = LineData(dataSets)
-        /*
-        chartView?.xAxis?.axisMaximum = 0.40F
-        chartView?.xAxis?.axisMinimum = 0.04F
-        chartView?.axisLeft?.axisMaximum = 0.10F
-        chartView?.axisLeft?.axisMinimum = 0.00F
-        */
         chartView?.description = null
         chartView?.setViewPortOffsets(0.0F, 0.0F, 0.0F, 0.0F)
         chartView?.data = data
@@ -402,6 +419,110 @@ class MainActivity : Activity(), SensorEventListener {
         chartView?.xAxis?.setDrawAxisLine(false)
         chartView?.legend?.isEnabled = false
         return lf / hf
+    }
+
+    private fun rmssd2Swell(rmssd: Double) : Double {
+        val maxssd : Double = 100.0 // Clamp to this
+        val minssd : Double = 40.0 // Clamp to this
+        val partition : Int = 100
+        val x = mutableListOf<Double>()
+        val y = mutableListOf<Double>()
+        val accumY = mutableListOf<Double>()
+        for (i in 0 until partition + 1) {
+            x.add((maxssd - minssd) * i / partition + minssd)
+        }
+        x.forEach { value ->
+            y.add(kotlin.math.exp(-((value - 70.177) / 12.459).pow(2.0)))
+        }
+        accumY.add(y[0])
+        for (i in 1 until y.size) {
+            accumY.add(accumY.last() + y[i])
+        }
+        accumY.replaceAll { value -> value / accumY.last() }
+        accumY.add(1.0)
+
+        val index = max(min(partition.toDouble(), (rmssd - minssd) * partition / (maxssd - minssd)), 0.0)
+        val indexInt = index.toInt()
+        val indexFraction = index - indexInt.toDouble()
+
+        val swellIndex =
+            ((accumY[indexInt] * (1 - indexFraction) + accumY[indexInt + 1] * indexFraction) * swellRmssd.size).toInt()
+                .coerceAtMost(swellRmssd.size - 1).coerceAtLeast(0)
+
+        return swellRmssd[swellIndex]
+    }
+
+    private fun pnn2Swell(pnn: Double) : Double {
+        val maxpnn : Double = 50.0 // Clamp to this
+        val minpnn : Double = 0.0 // Clamp to this
+        val partition : Int = 100
+        val x = mutableListOf<Double>()
+        val y = mutableListOf<Double>()
+        val accumY = mutableListOf<Double>()
+        for (i in 0 until partition + 1) {
+            x.add((maxpnn - minpnn) * i / partition + minpnn)
+        }
+        x.forEach { value ->
+            y.add(kotlin.math.exp(-((value - 28.781) / 6.8604 ).pow(2.0)))
+        }
+        accumY.add(y[0])
+        for (i in 1 until y.size) {
+            accumY.add(accumY.last() + y[i])
+        }
+        accumY.replaceAll { value -> value / accumY.last() }
+        accumY.add(1.0)
+
+        val index = max(min(partition.toDouble(), (pnn - minpnn) * partition / (maxpnn - minpnn)), 0.0)
+        val indexInt = index.toInt()
+        val indexFraction = index - indexInt.toDouble()
+
+        val swellIndex =
+            ((accumY[indexInt] * (1 - indexFraction) + accumY[indexInt + 1] * indexFraction) * swellPnn.size).toInt()
+                .coerceAtMost(swellPnn.size - 1).coerceAtLeast(0)
+
+        return swellPnn[swellIndex]
+    }
+
+    private fun lfhf2Swell(lfhf: Double) : Double {
+        val maxRatio : Double = 5.0 // Clamp to this
+        val partition : Int = 100
+        val x = mutableListOf<Double>()
+        val y = mutableListOf<Double>()
+        val accumY = mutableListOf<Double>()
+        for (i in 0 until partition + 1) {
+            x.add(maxRatio * i / partition)
+        }
+        x.forEach { value ->
+            y.add(value.pow(4.1) / (kotlin.math.exp(value * 4.68) - 1 + 1e-6))
+        }
+        accumY.add(y[0])
+        for (i in 1 until y.size) {
+            accumY.add(accumY.last() + y[i])
+        }
+        accumY.replaceAll { value -> value / accumY.last() }
+        accumY.add(1.0)
+
+        val index = min(partition.toDouble(), lfhf * partition / maxRatio)
+        val indexInt = index.toInt()
+        val indexFraction = index - indexInt.toDouble()
+
+        val swellIndex =
+            ((accumY[indexInt] * (1 - indexFraction) + accumY[indexInt + 1] * indexFraction) * swellLfhf.size).toInt()
+                .coerceAtMost(swellLfhf.size - 1).coerceAtLeast(0)
+
+        return swellLfhf[swellIndex]
+    }
+
+    private fun loadSwell() {
+        resources.openRawResource(R.raw.swell_lfhf).bufferedReader().useLines { lines ->
+            lines.forEach { swellLfhf.add(it.toDouble()) }
+        }
+        resources.openRawResource(R.raw.swell_rmssd).bufferedReader().useLines { lines ->
+            lines.forEach { swellRmssd.add(it.toDouble()) }
+        }
+        resources.openRawResource(R.raw.swell_pnn50).bufferedReader().useLines { lines ->
+            lines.forEach { swellPnn.add(it.toDouble()) }
+        }
     }
 
     override fun onAccuracyChanged(p0: Sensor?, p1: Int) {}
