@@ -1,13 +1,12 @@
 package com.jwpyo.soundmind.utils
 
 import android.util.Log
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.jwpyo.soundmind.model.stress.Stress
 import com.jwpyo.soundmind.model.ui.PPG
 import org.jtransforms.fft.DoubleFFT_1D
 import uk.me.berndporr.iirj.Butterworth
+import kotlin.math.abs
+import kotlin.math.pow
 
 class PPGConverter {
 
@@ -211,9 +210,7 @@ class PPGConverter {
             )
         }
 
-        // TODO : Implement Welch's method
-
-        // This time just FFT
+        // Just FFT
         val binFrequency = 1 / (rrXNew.last() - rrXNew.first())
         val input = DoubleArray(rrXNew.size * 2)
         val rrMagnitude = mutableListOf<Double>()
@@ -248,23 +245,28 @@ class PPGConverter {
             ) * rrMagnitude[i]
         }
 
-        // RR interval Visualization
-        val dataSets = ArrayList<ILineDataSet>()
-        val rrEntries = mutableListOf<Entry>()
-        for (i in 0 until rrXNew.size) {
-            rrEntries.add(Entry(rrXNew[i].toFloat(), rrYNew[i].toFloat()))
-        }
-        /*
-        for (i in 1 until rrMagnitude.size / 2) {
-            rrEntries.add(Entry((i * binFrequency).toFloat(), rrMagnitude[i].toFloat()))
-        }
-        */
-        val rrDataSet = LineDataSet(rrEntries, "RR Interval")
-        rrDataSet.valueTextSize = 0.0F
-        rrDataSet.setDrawCircles(false)
-        dataSets.add(rrDataSet)
+        val lfhf = lf / hf
 
-        return lf / hf
+        var rmssd = 0.0
+        var pnn50 = 0.0
+        for (i in 0 until rrY.size - 1) {
+            rmssd += (rrY[i + 1] - rrY[i]) * (rrY[i + 1] - rrY[i])
+            if (abs(rrY[i + 1] - rrY[i]) >= 0.05) {
+                pnn50 += 1.0
+            }
+        }
+        rmssd = kotlin.math.sqrt(rmssd / (rrY.size - 1)) * 1000
+        pnn50 = pnn50 / (rrY.size - 1)
+
+
+        val hr = 60.0 / (rrX.last() / rrY.size)
+
+        val result =
+            DecisionTreeClassifier.predict(doubleArrayOf(hr, rmssd, pnn50, lfhf))
+
+        Log.d("SWELL_DEBUG", "%d %.3f %.3f %.3f %.3f".format(result, hr, rmssd, pnn50, lfhf))
+
+        return (2.0).pow(result.toDouble() * 2 - 1)
     }
 
     companion object {
