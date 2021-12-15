@@ -35,7 +35,7 @@ class MainViewModel(
                 text = getSTT(array)
 
             voiceRepository.insertVoice(
-                Voice(startLDT, endLDT, array, text, volume, true)
+                Voice(startLDT, endLDT, array, text, volume, false)
             )
         }
     }

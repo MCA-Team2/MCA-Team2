@@ -22,7 +22,6 @@ import com.jwpyo.soundmind.model.stress.Stress
 import com.jwpyo.soundmind.model.ui.VolumeItem
 import com.jwpyo.soundmind.utils.Constant.WIDTH_PER_HOUR
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 @SuppressLint("ClickableViewAccessibility")
 class HistoryFragment : DatabindingFragment() {
@@ -75,6 +74,10 @@ class HistoryFragment : DatabindingFragment() {
         }
 
         binding.audioFileExportButton.setOnClickListener { ShareDialog().show(context) }
+
+        binding.sttRefreshBtn.setOnClickListener {
+            binding.sttText.text = viewModel.stt ?: "No Data"
+        }
 
         binding.chartScrollView.setOnTouchListener { _, event ->
             when (event.action) {
@@ -180,7 +183,11 @@ class HistoryFragment : DatabindingFragment() {
         }
 
         viewModel.getAudioByteArrayLiveDate.observe(viewLifecycleOwner) {
-            Log.d("hello", "$it")
+            Log.d("hello1", "$it")
+        }
+
+        viewModel.getSTTLiveData.observe(viewLifecycleOwner) {
+            Log.d("hello2", "$it")
         }
     }
 }
