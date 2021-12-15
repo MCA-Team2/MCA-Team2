@@ -9,6 +9,7 @@ import com.jwpyo.soundmind.model.stress.Stress
 import com.jwpyo.soundmind.model.voice.Voice
 import com.jwpyo.soundmind.repository.StressRepository
 import com.jwpyo.soundmind.repository.VoiceRepository
+import com.jwpyo.soundmind.utils.getSTT
 import com.jwpyo.soundmind.utils.getVolume
 import kotlinx.coroutines.launch
 import org.threeten.bp.LocalDateTime
@@ -23,8 +24,7 @@ class MainViewModel(
         viewModelScope.launch {
             val array = dataClient.getByteArrayFromAsset(asset)
             voiceRepository.insertVoice(
-               // Voice(startLDT, endLDT, array, getSTT(array), getVolume(array), checkBell(this, array))
-                Voice(startLDT, endLDT, array, "", getVolume(array), true)
+                Voice(startLDT, endLDT, array, getSTT(array), getVolume(array), true)
             )
         }
     }
