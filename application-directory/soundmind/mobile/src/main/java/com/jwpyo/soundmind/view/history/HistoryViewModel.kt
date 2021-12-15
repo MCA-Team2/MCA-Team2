@@ -1,6 +1,5 @@
 package com.jwpyo.soundmind.view.history
 
-import android.util.Log
 import androidx.lifecycle.*
 import com.jwpyo.soundmind.model.stress.Stress
 import com.jwpyo.soundmind.model.ui.VolumeItem
@@ -43,6 +42,9 @@ class HistoryViewModel(
 
     val getAudioByteArrayLiveDate: LiveData<() -> ByteArray>
     val audioByteArray: ByteArray? get() = getAudioByteArrayLiveDate.value?.let { it() }
+
+    val getSTTLiveData: LiveData<() -> String>
+    val stt: String? get() = getSTTLiveData.value?.let { it() }
 
     val soundPlayer: SoundPlayer = SoundPlayer()
     var playingJob: Job? = null
@@ -118,6 +120,21 @@ class HistoryViewModel(
                 var merged = ByteArray(0)
                 voiceList.onEach { voice ->
                     merged += voice.array
+                }
+                merged
+            }
+        }.asLiveData()
+
+        getSTTLiveData = combine(
+            historyDate, audioStartPosition.asFlow(), audioEndPosition.asFlow()
+        ) { date, sTime, eTime ->
+            return@combine {
+                val voiceList = voiceRepository.getVoices(date.atTime(sTime), date.atTime(eTime))
+
+                var merged = ""
+                voiceList.onEach { voice ->
+                    merged += voice.text + " "
+                    if (voice.hasBell) merged += "\n\n띵동쓰~\n\n"
                 }
                 merged
             }

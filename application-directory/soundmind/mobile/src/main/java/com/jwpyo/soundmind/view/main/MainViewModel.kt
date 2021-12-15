@@ -24,7 +24,7 @@ class MainViewModel(
         viewModelScope.launch {
             val array = dataClient.getByteArrayFromAsset(asset)
             voiceRepository.insertVoice(
-                Voice(startLDT, endLDT, array, getSTT(array), getVolume(array), true)
+                Voice(startLDT, endLDT, array, getSTT(array), getVolume(array), false)
             )
         }
     }
